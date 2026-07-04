@@ -1,0 +1,472 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Cognify — production database schema (PostgreSQL)
+//
+// This models the full domain for the multi-tenant SaaS: users & auth,
+// institutions/classrooms, courses, notes, decks & FSRS card scheduling,
+// quizzes & attempts, planner, AI tutor threads, gamification, social,
+// subscriptions/billing and audit logging.
+//
+//   npx prisma generate      # generate the client
+//   npx prisma migrate dev   # create + apply a migration
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth & users ─────────────────────────────────────────────────────────────
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum Plan {
+  FREE
+  PREMIUM
+  INSTITUTION
+  ENTERPRISE
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  emailVerified     DateTime?
+  name              String?
+  avatar            String    @default("🦊")
+  passwordHash      String? // null for OAuth-only accounts
+  role              Role      @default(STUDENT)
+  plan              Plan      @default(FREE)
+
+  // Verification
+  studentVerified     Boolean @default(false)
+  institutionVerified Boolean @default(false)
+
+  // Security
+  twoFactorEnabled  Boolean   @default(false)
+  twoFactorSecret   String?
+  lastLoginAt       DateTime?
+
+  // Preferences (JSON: theme, targets, retention, notifications…)
+  settings          Json      @default("{}")
+
+  institutionId     String?
+  institution       Institution? @relation(fields: [institutionId], references: [id])
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  accounts          Account[]
+  sessions          Session[]
+  subjects          Subject[]
+  notes             Note[]
+  decks             Deck[]
+  cards             Card[]
+  reviews           ReviewLog[]
+  quizzes           Quiz[]
+  attempts          QuizAttempt[]
+  plannerTasks      PlannerTask[]
+  threads           TutorThread[]
+  gamification      Gamification?
+  activities        DailyActivity[]
+  achievements      UserAchievement[]
+  memberships       GroupMember[]
+  subscription      Subscription?
+  auditLogs         AuditLog[]
+  uploads           Upload[]
+
+  @@index([institutionId])
+  @@index([plan])
+}
+
+// Auth.js (NextAuth) adapter models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Institutions / classrooms ────────────────────────────────────────────────
+
+model Institution {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String?  @unique // email domain for auto-verification
+  plan      Plan     @default(INSTITUTION)
+  seats     Int      @default(50)
+  createdAt DateTime @default(now())
+
+  users      User[]
+  classrooms Classroom[]
+}
+
+model Classroom {
+  id            String   @id @default(cuid())
+  name          String
+  joinCode      String   @unique
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  teacherId     String
+  createdAt     DateTime @default(now())
+
+  @@index([institutionId])
+}
+
+// ─── Courses & content ────────────────────────────────────────────────────────
+
+model Subject {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  emoji     String    @default("📚")
+  color     String    @default("indigo")
+  goal      String?
+  examDate  DateTime?
+  pinned    Boolean   @default(false)
+  archived  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  notes   Note[]
+  decks   Deck[]
+  quizzes Quiz[]
+
+  @@index([userId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjectId String?
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  title     String
+  content   String   @db.Text // Markdown
+  tags      String[]
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  versions NoteVersion[]
+
+  @@index([userId])
+  @@index([subjectId])
+}
+
+model NoteVersion {
+  id      String   @id @default(cuid())
+  noteId  String
+  note    Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  content String   @db.Text
+  savedAt DateTime @default(now())
+
+  @@index([noteId])
+}
+
+// ─── Flashcards & spaced repetition ──────────────────────────────────────────
+
+enum CardKind {
+  BASIC
+  CLOZE
+  MCQ
+  TRUEFALSE
+}
+
+enum CardState {
+  NEW
+  LEARNING
+  REVIEW
+  RELEARNING
+}
+
+model Deck {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjectId   String?
+  subject     Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  name        String
+  description String   @default("")
+  emoji       String   @default("🗂️")
+  shared      Boolean  @default(false) // public deck sharing
+  createdAt   DateTime @default(now())
+
+  cards Card[]
+
+  @@index([userId])
+  @@index([subjectId])
+}
+
+model Card {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deckId     String
+  deck       Deck      @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  kind       CardKind  @default(BASIC)
+  front      String    @db.Text
+  back       String    @db.Text
+  options    String[]  // MCQ options
+  answerIndex Int?
+  tags       String[]
+
+  // FSRS scheduling state
+  state      CardState @default(NEW)
+  due        DateTime  @default(now())
+  stability  Float     @default(0)
+  difficulty Float     @default(0)
+  step       Int       @default(0)
+  reps       Int       @default(0)
+  lapses     Int       @default(0)
+  lastReview DateTime?
+
+  createdAt  DateTime  @default(now())
+  reviews    ReviewLog[]
+
+  @@index([userId])
+  @@index([deckId])
+  @@index([userId, due]) // the hot path: "cards due for this user"
+}
+
+model ReviewLog {
+  id          String   @id @default(cuid())
+  cardId      String
+  card        Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating      Int // 1..4 (Again/Hard/Good/Easy)
+  elapsedDays Float
+  stability   Float
+  difficulty  Float
+  reviewedAt  DateTime @default(now())
+
+  @@index([cardId])
+  @@index([userId, reviewedAt])
+}
+
+// ─── Quizzes & exams ──────────────────────────────────────────────────────────
+
+enum QuizSource {
+  MANUAL
+  AI
+  SEED
+}
+
+model Quiz {
+  id          String     @id @default(cuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjectId   String?
+  subject     Subject?   @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  title       String
+  description String     @default("")
+  questions   Json // QuizQuestion[]
+  timeLimitMinutes Int?
+  source      QuizSource @default(MANUAL)
+  createdAt   DateTime   @default(now())
+
+  attempts QuizAttempt[]
+
+  @@index([userId])
+  @@index([subjectId])
+}
+
+model QuizAttempt {
+  id           String   @id @default(cuid())
+  quizId       String
+  quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mode         String // practice | exam
+  answers      Json // { questionId, given, correct }[]
+  scorePercent Int
+  startedAt    DateTime
+  finishedAt   DateTime @default(now())
+
+  @@index([quizId])
+  @@index([userId])
+}
+
+// ─── Planner ──────────────────────────────────────────────────────────────────
+
+model PlannerTask {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjectId   String?
+  date        DateTime @db.Date
+  title       String
+  kind        String // study | review | quiz | break | exam
+  durationMin Int
+  done        Boolean  @default(false)
+  auto        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([userId, date])
+}
+
+// ─── AI tutor ─────────────────────────────────────────────────────────────────
+
+model TutorThread {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjectId String?
+  title     String
+  messages  Json // ChatMessage[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ─── Gamification & analytics ─────────────────────────────────────────────────
+
+model Gamification {
+  userId         String   @id
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  xp             Int      @default(0)
+  coins          Int      @default(0)
+  streakCurrent  Int      @default(0)
+  streakBest     Int      @default(0)
+  lastActiveDay  String? // ISO date
+  updatedAt      DateTime @updatedAt
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+}
+
+model DailyActivity {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date           String // ISO date
+  xp             Int      @default(0)
+  reviews        Int      @default(0)
+  reviewsCorrect Int      @default(0)
+  quizQuestions  Int      @default(0)
+  quizCorrect    Int      @default(0)
+  studyMinutes   Int      @default(0)
+  notesEdited    Int      @default(0)
+
+  @@unique([userId, date])
+  @@index([userId])
+}
+
+// ─── Social learning ──────────────────────────────────────────────────────────
+
+model StudyGroup {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  createdAt DateTime @default(now())
+
+  members GroupMember[]
+}
+
+model GroupMember {
+  id       String   @id @default(cuid())
+  groupId  String
+  group    StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     String   @default("member") // owner | member
+  joinedAt DateTime @default(now())
+
+  @@unique([groupId, userId])
+  @@index([userId])
+}
+
+// ─── Subscriptions / billing ──────────────────────────────────────────────────
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan                 Plan     @default(FREE)
+  status               String   @default("active") // active | trialing | past_due | canceled
+  stripeCustomerId     String?  @unique
+  stripeSubscriptionId String?  @unique
+  currentPeriodEnd     DateTime?
+  trialEndsAt          DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+// ─── Storage ──────────────────────────────────────────────────────────────────
+
+model Upload {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  filename  String
+  mimeType  String
+  sizeBytes Int
+  key       String // S3/R2 object key
+  kind      String // pdf | image | audio | other
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ─── Audit log (security & compliance) ───────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String // e.g. auth.login, card.review, subscription.upgraded
+  ip        String?
+  userAgent String?
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action, createdAt])
+}

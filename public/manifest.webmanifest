@@ -1,0 +1,19 @@
+{
+  "name": "Cognify — AI Learning Platform",
+  "short_name": "Cognify",
+  "description": "AI tutoring, spaced-repetition flashcards, smart notes, quizzes and study planning in one app.",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#090c14",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
