@@ -8,7 +8,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
+import { useAccount } from "@/lib/account";
 import { useTheme } from "@/components/theme";
+import { Cloud, CloudOff, RefreshCw } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Card, Badge, useToast, Modal, ConfirmButton } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -37,6 +39,9 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Settings" description="Manage your profile, appearance, study preferences and data." icon={<User className="text-brand-500" />} />
+
+      {/* Account & sync */}
+      <AccountSection />
 
       {/* Profile */}
       <SettingsSection icon={<User size={17} />} title="Profile">
@@ -168,6 +173,43 @@ export default function SettingsPage() {
 
       <ImportModal open={importOpen} onClose={() => setImportOpen(false)} />
     </div>
+  );
+}
+
+function AccountSection() {
+  const { user, status, logout, syncNow } = useAccount();
+  const toast = useToast();
+
+  return (
+    <SettingsSection icon={<Cloud size={17} />} title="Account & cloud sync">
+      {user ? (
+        <div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="font-medium">{user.name || user.email}</div>
+              <div className="text-xs text-ink-faint">{user.email}</div>
+            </div>
+            <Badge tone={status === "synced" ? "teal" : status === "syncing" ? "brand" : "amber"}>
+              {status === "syncing" ? <RefreshCw size={11} className="animate-spin" /> : status === "synced" ? <Cloud size={11} /> : <CloudOff size={11} />}
+              <span className="capitalize">{status}</span>
+            </Badge>
+          </div>
+          <p className="mt-2 text-xs text-ink-muted">Your notes, decks, reviews and progress sync automatically across every device you sign in on.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button onClick={() => { syncNow(); toast({ emoji: "☁️", title: "Syncing now" }); }} className="btn-secondary btn-sm"><RefreshCw size={13} /> Sync now</button>
+            <button onClick={async () => { await logout(); toast({ emoji: "👋", title: "Signed out", description: "You're back in guest mode — data stays on this device." }); }} className="btn-secondary btn-sm"><LogOut size={13} /> Sign out</button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 font-medium"><CloudOff size={15} className="text-ink-faint" /> Guest mode</div>
+            <p className="mt-1 text-xs text-ink-muted">Your data lives only in this browser. Create a free account to back it up and sync across devices.</p>
+          </div>
+          <Link href="/login" className="btn-primary btn-sm">Sign in / register</Link>
+        </div>
+      )}
+    </SettingsSection>
   );
 }
 

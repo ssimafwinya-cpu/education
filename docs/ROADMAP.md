@@ -18,20 +18,24 @@ not yet live. Everything below builds on that foundation.
 
 ## Phase 1 — Real backend (the unlock for everything else)
 
-**Goal: multi-device accounts with server-side truth.** ~2–3 weeks solo pace.
+**Goal: multi-device accounts with server-side truth.**
+**Status: ✅ shipped** (snapshot-sync variant; entity-level REST is the follow-up).
 
-| # | Work | Notes |
-|---|------|-------|
-| 1.1 | Provision Postgres, run `prisma migrate`, generate client | compose stack already defines it |
-| 1.2 | Implement REST routes from `docs/API.md` (subjects, notes, decks, cards, review, quizzes, planner, threads) | reuse the exact reducer action shapes; FSRS runs server-side in `POST /cards/:id/review` |
-| 1.3 | Auth.js: credentials + Google/GitHub OAuth, session middleware on `/app/*` | adapter models already in schema |
-| 1.4 | Client sync layer: store dispatch → optimistic update → API call → reconcile | keep localStorage as offline cache, not truth |
-| 1.5 | First-login import: offer to upload existing local data | the Settings export format is already the wire format |
-| 1.6 | Redis rate limiting on AI + auth routes | sliding window per user+IP |
-| 1.7 | Integration tests against a test database | extend vitest with a `docker compose` test target |
+| # | Work | Status |
+|---|------|--------|
+| 1.1 | Postgres + `prisma migrate` + generated client (25 tables live) | ✅ done |
+| 1.2 | Credentials auth: register/login/logout/me — bcrypt(12), HS256 JWT httpOnly cookies | ✅ done |
+| 1.3 | Cloud sync `GET/PUT /api/sync`: whole-state snapshot, optimistic versioning, 409 conflict flow | ✅ done |
+| 1.4 | Client sync layer: pull on login, debounced push, conflict → adopt server, online/offline awareness | ✅ done |
+| 1.5 | Storage abstraction: PrismaStore (`DATABASE_URL`) / zero-config FileStore fallback | ✅ done |
+| 1.6 | Per-IP rate limiting on auth + sync (in-memory; Redis interface-compatible) | ✅ done |
+| 1.7 | First-login seed: local guest state uploads as the initial cloud snapshot | ✅ done |
+| 1.8 | Entity-level REST routes (subjects/notes/cards/review…) replacing snapshot sync | ◻ next |
+| 1.9 | OAuth providers via Auth.js (needs client IDs) | ◻ next |
 
-**Exit criteria:** log in on two devices, review a card on one, see the new due
-date on the other.
+**Exit criteria met:** registered on device A, changed state, logged in on
+device B in a separate browser context — device B pulled A's state; stale
+writes 409 correctly. Verified against real PostgreSQL 16 end-to-end.
 
 ## Phase 2 — Accounts, billing, lifecycle
 

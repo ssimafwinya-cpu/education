@@ -80,6 +80,7 @@ model User {
   subscription      Subscription?
   auditLogs         AuditLog[]
   uploads           Upload[]
+  snapshot          StateSnapshot?
 
   @@index([institutionId])
   @@index([plan])
@@ -453,6 +454,20 @@ model Upload {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+// ─── Client state sync ────────────────────────────────────────────────────────
+// Whole-state snapshot per user: the wire format is the client store's
+// AppState JSON. Optimistic concurrency via the monotonically increasing
+// version. Entity-level REST sync (docs/API.md) supersedes this later; the
+// snapshot keeps multi-device support simple and reliable in the meantime.
+
+model StateSnapshot {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data      Json
+  version   Int      @default(1)
+  updatedAt DateTime @updatedAt
 }
 
 // ─── Audit log (security & compliance) ───────────────────────────────────────

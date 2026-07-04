@@ -6,10 +6,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Brain, Mail, Lock, ArrowRight, Github, Apple, Sparkles, ShieldCheck, KeyRound } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { useAccount } from "@/lib/account";
 
-// A visual auth experience. Real OAuth/credential flows are documented in
-// docs/SECURITY.md and wired via Auth.js in production; here any provider
-// simply enters the app so the full product is explorable.
+// Email/password auth is real: it registers against the server (bcrypt + JWT
+// session cookie) and enables cross-device cloud sync. OAuth buttons are
+// wired via Auth.js in production (they need provider client IDs) — here they
+// fall back to guest mode so the product stays explorable.
 
 function GoogleIcon() {
   return (
@@ -23,16 +25,35 @@ function MicrosoftIcon() {
 export default function Login() {
   const router = useRouter();
   const { dispatch } = useStore();
+  const { register, login } = useAccount();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState<string | null>(null);
 
+  /** OAuth / magic-link buttons: guest entry in the demo (real via Auth.js in prod). */
   const enter = (provider: string) => {
     setLoading(provider);
     if (mode === "signup" && name) dispatch({ type: "UPDATE_PROFILE", patch: { name } });
     if (email) dispatch({ type: "UPDATE_PROFILE", patch: { email } });
     setTimeout(() => router.push("/app"), 450);
+  };
+
+  /** Email/password: real server-side auth + cloud sync. */
+  const submitCredentials = async () => {
+    setError("");
+    setLoading("email");
+    const result = mode === "signup"
+      ? await register(email, password, name)
+      : await login(email, password);
+    if (result.ok) {
+      router.push("/app");
+    } else {
+      setError(result.error ?? "Something went wrong.");
+      setLoading(null);
+    }
   };
 
   return (
@@ -85,7 +106,7 @@ export default function Login() {
             <div className="h-px flex-1 bg-edge" /> or <div className="h-px flex-1 bg-edge" />
           </div>
 
-          <form onSubmit={(e) => { e.preventDefault(); enter("email"); }} className="space-y-3">
+          <form onSubmit={(e) => { e.preventDefault(); submitCredentials(); }} className="space-y-3">
             {mode === "signup" && (
               <label className="block">
                 <span className="mb-1 block text-xs font-medium text-ink-muted">Name</span>
@@ -96,7 +117,7 @@ export default function Login() {
               <span className="mb-1 block text-xs font-medium text-ink-muted">Email</span>
               <div className="relative">
                 <Mail size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input pl-9" placeholder="you@school.edu" />
+                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input pl-9" placeholder="you@school.edu" />
               </div>
             </label>
             <label className="block">
@@ -105,12 +126,14 @@ export default function Login() {
               </span>
               <div className="relative">
                 <Lock size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
-                <input type="password" className="input pl-9" placeholder="••••••••" />
+                <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} className="input pl-9" placeholder="••••••••  (min 8 characters)" />
               </div>
             </label>
+            {error && <p className="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-600 dark:text-rose-400">{error}</p>}
             <button type="submit" disabled={!!loading} className="btn-primary w-full">
-              {loading ? "Signing in…" : mode === "signin" ? "Log in" : "Create account"} <ArrowRight size={16} />
+              {loading === "email" ? "Signing in…" : mode === "signin" ? "Log in" : "Create account"} <ArrowRight size={16} />
             </button>
+            <p className="text-center text-[11px] text-ink-faint">Email accounts sync your data across devices.</p>
           </form>
 
           <button onClick={() => enter("magic")} className="btn-ghost mt-2 w-full text-brand-500">

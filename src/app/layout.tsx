@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme";
 import { StoreProvider } from "@/lib/store";
+import { AccountProvider } from "@/lib/account";
 import { ToastHost } from "@/components/ui";
 import { PwaRegister } from "@/components/pwa-register";
 
@@ -50,7 +51,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="app-aurora">
         <ThemeProvider>
           <StoreProvider>
-            <ToastHost>{children}</ToastHost>
+            <AccountProvider>
+              <ToastHost>{children}</ToastHost>
+            </AccountProvider>
           </StoreProvider>
         </ThemeProvider>
         <PwaRegister />

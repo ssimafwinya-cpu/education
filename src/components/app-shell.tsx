@@ -8,9 +8,10 @@ import {
   LayoutDashboard, BookOpen, StickyNote, Layers, Brain, ListChecks,
   GraduationCap, MessageSquare, CalendarDays, LineChart, Trophy, Settings,
   Search, Menu, X, Flame, Sun, Moon, Monitor, Sparkles, Command,
-  FileText, Network, Users, Shield,
+  FileText, Network, Users, Shield, Cloud, CloudOff, RefreshCw,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { useAccount } from "@/lib/account";
 import { useTheme } from "@/components/theme";
 import { globalSearch } from "@/lib/selectors";
 import { levelProgress, levelTitle } from "@/lib/gamification";
@@ -236,6 +237,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </button>
 
           <div className="ml-auto flex items-center gap-2">
+            <SyncBadge />
             <Link href="/app/tutor" className="btn-primary btn-sm hidden sm:inline-flex">
               <Sparkles size={15} /> Ask AI
             </Link>
@@ -257,6 +259,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {ready && !state.onboarded && <Onboarding />}
     </div>
+  );
+}
+
+function SyncBadge() {
+  const { user, status, syncNow } = useAccount();
+  if (!user) {
+    return (
+      <Link href="/login" className="btn-ghost btn-sm hidden text-ink-faint sm:inline-flex" title="Sign in to sync across devices">
+        <CloudOff size={16} /> <span className="hidden md:inline">Guest</span>
+      </Link>
+    );
+  }
+  const icon =
+    status === "syncing" ? <RefreshCw size={16} className="animate-spin" /> :
+    status === "offline" || status === "error" ? <CloudOff size={16} /> :
+    <Cloud size={16} />;
+  const label = status === "syncing" ? "Syncing…" : status === "offline" ? "Offline" : status === "error" ? "Retry sync" : "Synced";
+  const tone = status === "error" ? "text-rose-500" : status === "offline" ? "text-amber-500" : "text-teal-500";
+  return (
+    <button onClick={() => syncNow()} className={cn("btn-ghost btn-sm hidden sm:inline-flex", tone)} title={`Cloud sync: ${label} (${user.email})`}>
+      {icon} <span className="hidden md:inline">{label}</span>
+    </button>
   );
 }
 

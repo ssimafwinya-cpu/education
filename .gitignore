@@ -38,6 +38,9 @@ yarn-error.log*
 prisma/*.db
 prisma/migrations/dev.db*
 
+# file-store data (dev accounts & snapshots)
+.data/
+
 # testing
 coverage/
 

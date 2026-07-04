@@ -72,6 +72,39 @@ Errors: `400` invalid JSON/kind, `422` not enough text (< 20 chars).
 { "status": "ok", "service": "cognify", "version": "1.0.0", "aiProvider": "offline", "timestamp": "…" }
 ```
 
+### Auth — `POST /api/auth/register` · `login` · `logout` · `GET /api/auth/me`
+
+Real credentials auth: bcrypt(12) password hashing, HS256 JWT in an httpOnly
+`SameSite=Lax` cookie (30-day session), per-IP rate limiting (5 register/min,
+10 login/min). Storage driver: PostgreSQL via Prisma when `DATABASE_URL` is
+set, zero-config JSON file store otherwise.
+
+```jsonc
+// POST /api/auth/register  { email, password (≥8), name? }
+// 201 → { "user": { "id", "email", "name", "avatar", "role" } }  + session cookie
+// 409 email taken · 422 validation · 429 rate limited
+
+// POST /api/auth/login     { email, password }
+// 200 → { "user": … } + session cookie · 401 bad credentials (constant-shaped)
+
+// GET /api/auth/me         → 200 { "user": … } | 401 { "user": null }
+// POST /api/auth/logout    → clears the cookie
+```
+
+### `GET | PUT /api/sync` — cross-device state sync
+
+Whole-`AppState` snapshot per user with **optimistic concurrency**. The client
+pulls on login, then debounce-pushes changes; a `409` means another device
+wrote first — the client pulls and adopts the server state.
+
+```jsonc
+// GET → { "data": AppState | null, "version": n, "updatedAt": ms }
+// PUT { "data": AppState, "version": lastSeenVersion }   (version 0 = first write)
+//   200 → { "version": n+1 }
+//   409 → { "error": "Version conflict", "version": current }   // pull first
+// 401 unauthenticated · 413 > 4 MB · 429 > 30 writes/min
+```
+
 ---
 
 ## 2. Backend REST contract
