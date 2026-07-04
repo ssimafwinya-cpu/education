@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Plus, Brain, Trash2, Pencil, Sparkles, X, Check, Layers, Clock,
+  Download, Upload,
 } from "lucide-react";
 import { useStore, actions } from "@/lib/store";
 import { Card, Badge, EmptyState, Modal, useToast, ConfirmButton } from "@/components/ui";
 import { generateFlashcards } from "@/lib/ai/client";
+import { exportDeckTsv, parseDeckFile, dedupeAgainst } from "@/lib/deck-io";
 import { currentRetention } from "@/lib/fsrs";
 import { cn, formatRelative } from "@/lib/utils";
 import type { CardKind, Flashcard } from "@/lib/types";
@@ -26,11 +28,41 @@ export default function DeckDetail() {
   const [adding, setAdding] = useState(false);
   const [genOpen, setGenOpen] = useState(false);
 
+  const importRef = useRef<HTMLInputElement>(null);
+
   const deck = state.decks.find((d) => d.id === id);
+  const cards = state.cards.filter((c) => c.deckId === id);
+
+  const exportDeck = () => {
+    if (!deck) return;
+    const blob = new Blob([exportDeckTsv(cards)], { type: "text/tab-separated-values" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${deck.name.toLowerCase().replace(/\s+/g, "-")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ emoji: "📦", title: "Deck exported", description: "Anki-compatible TSV downloaded." });
+  };
+
+  const importDeck = async (file: File) => {
+    const parsed = parseDeckFile(await file.text());
+    if (parsed.length === 0) {
+      toast({ emoji: "🤔", title: "Nothing to import", description: "Expected TSV or CSV with front and back columns." });
+      return;
+    }
+    const { kept, skipped } = dedupeAgainst(cards.map((c) => c.front), parsed);
+    dispatch({ type: "ADD_CARDS", cards: kept.map((c) => actions.newCard(id, { front: c.front, back: c.back, tags: c.tags })) });
+    toast({
+      emoji: "📥",
+      title: `Imported ${kept.length} cards`,
+      description: skipped > 0 ? `${skipped} duplicates skipped.` : "All scheduled for review.",
+    });
+  };
+
   if (!deck) {
     return <EmptyState icon="🔍" title="Deck not found" action={<Link href="/app/flashcards" className="btn-primary">Back to decks</Link>} />;
   }
-  const cards = state.cards.filter((c) => c.deckId === id);
   const due = cards.filter((c) => c.srs.due <= Date.now()).length;
   const subj = state.subjects.find((s) => s.id === deck.subjectId);
 
@@ -55,6 +87,9 @@ export default function DeckDetail() {
           {due > 0 && <Link href={`/app/review?deck=${id}`} className="btn-primary"><Brain size={16} /> Review ({due})</Link>}
           <button onClick={() => setGenOpen(true)} className="btn-secondary"><Sparkles size={16} /> AI generate</button>
           <button onClick={() => setAdding(true)} className="btn-secondary"><Plus size={16} /> Add card</button>
+          <button onClick={() => importRef.current?.click()} className="btn-ghost btn-sm" title="Import TSV/CSV (Anki-compatible)"><Upload size={15} /> Import</button>
+          {cards.length > 0 && <button onClick={exportDeck} className="btn-ghost btn-sm" title="Export as Anki-compatible TSV"><Download size={15} /> Export</button>}
+          <input ref={importRef} type="file" accept=".txt,.tsv,.csv,text/plain,text/csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importDeck(f); e.target.value = ""; }} />
         </div>
       </div>
 

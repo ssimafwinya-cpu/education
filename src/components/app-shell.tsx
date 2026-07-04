@@ -79,6 +79,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const toast = useToast();
 
   const dueCount = useMemo(
@@ -87,12 +88,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
   const progress = levelProgress(state.game.xp);
 
-  // ⌘K / Ctrl-K command palette.
+  // Global keys: ⌘K palette, ? shortcut cheatsheet.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setPaletteOpen((v) => !v);
+        return;
+      }
+      const target = e.target as HTMLElement | null;
+      const typing = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
+      if (e.key === "?" && !typing) {
+        e.preventDefault();
+        setShortcutsOpen((v) => !v);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -256,9 +264,77 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} onNavigate={(href) => { setPaletteOpen(false); router.push(href); }} />
+      <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
       {ready && !state.onboarded && <Onboarding />}
     </div>
+  );
+}
+
+const SHORTCUTS: { keys: string[]; label: string; scope: string }[] = [
+  { keys: ["⌘", "K"], label: "Search & command palette", scope: "Global" },
+  { keys: ["?"], label: "This cheatsheet", scope: "Global" },
+  { keys: ["Esc"], label: "Close dialogs", scope: "Global" },
+  { keys: ["Space"], label: "Reveal answer", scope: "Review" },
+  { keys: ["1"], label: "Rate: Again", scope: "Review" },
+  { keys: ["2"], label: "Rate: Hard", scope: "Review" },
+  { keys: ["3"], label: "Rate: Good", scope: "Review" },
+  { keys: ["4"], label: "Rate: Easy", scope: "Review" },
+  { keys: ["Enter"], label: "Send message / submit answer", scope: "Tutor & quizzes" },
+  { keys: ["Shift", "Enter"], label: "New line in message", scope: "Tutor" },
+];
+
+function ShortcutsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  const scopes = [...new Set(SHORTCUTS.map((s) => s.scope))];
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Keyboard shortcuts"
+            className="relative w-full max-w-md glass rounded-2xl p-5 shadow-lift"
+            initial={{ opacity: 0, scale: 0.96, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: 8 }}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Keyboard shortcuts</h2>
+              <button onClick={onClose} className="btn-ghost btn-sm" aria-label="Close"><X size={17} /></button>
+            </div>
+            <div className="space-y-4">
+              {scopes.map((scope) => (
+                <div key={scope}>
+                  <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-ink-faint">{scope}</div>
+                  <div className="space-y-1">
+                    {SHORTCUTS.filter((s) => s.scope === scope).map((s) => (
+                      <div key={s.label} className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-surface">
+                        <span className="text-sm text-ink-muted">{s.label}</span>
+                        <span className="flex gap-1">
+                          {s.keys.map((k) => (
+                            <kbd key={k} className="rounded-md border border-edge bg-surface-raised px-1.5 py-0.5 text-[11px] font-medium">{k}</kbd>
+                          ))}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }
 

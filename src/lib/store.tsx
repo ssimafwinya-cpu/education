@@ -16,6 +16,7 @@ import { buildSeedState } from "./seed";
 import {
   ACHIEVEMENTS, bumpStreak, emptyDay, newlyUnlocked, XP,
 } from "./gamification";
+import { dedupeAgainst } from "./deck-io";
 import { isoDate, uid } from "./utils";
 
 const STORAGE_KEY = "cognify.state.v1";
@@ -202,8 +203,27 @@ function reducer(state: AppState, action: Action): AppState {
         decks: state.decks.filter((d) => d.id !== action.id),
         cards: state.cards.filter((c) => c.deckId !== action.id),
       };
-    case "ADD_CARDS":
-      return { ...state, cards: [...action.cards, ...state.cards] };
+    case "ADD_CARDS": {
+      // Near-duplicate protection per deck: skip incoming cards whose front
+      // already exists (AI generation over overlapping material is common).
+      const byDeck = new Map<string, string[]>();
+      for (const c of state.cards) {
+        const list = byDeck.get(c.deckId) ?? [];
+        list.push(c.front);
+        byDeck.set(c.deckId, list);
+      }
+      const kept: typeof action.cards = [];
+      for (const card of action.cards) {
+        const existing = byDeck.get(card.deckId) ?? [];
+        const { kept: k } = dedupeAgainst(existing, [card]);
+        if (k.length) {
+          kept.push(card);
+          existing.push(card.front);
+          byDeck.set(card.deckId, existing);
+        }
+      }
+      return { ...state, cards: [...kept, ...state.cards] };
+    }
     case "UPDATE_CARD":
       return {
         ...state,

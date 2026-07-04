@@ -4,12 +4,13 @@ import { Suspense, useMemo, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, Check, RotateCcw, Home, Keyboard, Zap, Target } from "lucide-react";
+import { Brain, Check, RotateCcw, Home, Keyboard, Zap, Target, Volume2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Card, ProgressRing, EmptyState, Badge } from "@/components/ui";
 import { Markdown } from "@/components/markdown";
 import { dueCards } from "@/lib/selectors";
 import { previewIntervals } from "@/lib/fsrs";
+import { speak, stopSpeaking, ttsSupported } from "@/lib/speech";
 import { cn } from "@/lib/utils";
 import type { Flashcard, Rating } from "@/lib/types";
 
@@ -188,7 +189,10 @@ function ReviewInner() {
           <Card className="min-h-[300px] p-8">
             <div className="mb-4 flex items-center justify-between">
               <Badge tone="brand" className="capitalize">{current.srs.state}</Badge>
-              <span className="text-xs text-ink-faint">{current.kind === "cloze" ? "Cloze" : current.kind === "mcq" ? "Multiple choice" : current.kind === "truefalse" ? "True / False" : "Basic"}</span>
+              <div className="flex items-center gap-2">
+                <ReadAloudButton text={revealed ? `${current.front}. Answer: ${current.back}` : current.front} />
+                <span className="text-xs text-ink-faint">{current.kind === "cloze" ? "Cloze" : current.kind === "mcq" ? "Multiple choice" : current.kind === "truefalse" ? "True / False" : "Basic"}</span>
+              </div>
             </div>
 
             {/* Front */}
@@ -243,6 +247,29 @@ function ReviewInner() {
         <span className="flex items-center gap-1"><Zap size={12} /> +{stats.xp} XP</span>
       </div>
     </div>
+  );
+}
+
+/** Read-aloud (TTS) — hidden when the browser lacks speechSynthesis. */
+function ReadAloudButton({ text }: { text: string }) {
+  const [supported, setSupported] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  useEffect(() => setSupported(ttsSupported()), []);
+  useEffect(() => () => stopSpeaking(), []);
+  if (!supported) return null;
+  return (
+    <button
+      onClick={() => {
+        if (speaking) { stopSpeaking(); setSpeaking(false); return; }
+        setSpeaking(true);
+        speak(text, { onEnd: () => setSpeaking(false) });
+      }}
+      className={cn("btn-ghost btn-sm", speaking && "text-brand-500")}
+      title={speaking ? "Stop reading" : "Read aloud"}
+      aria-label="Read card aloud"
+    >
+      <Volume2 size={15} />
+    </button>
   );
 }
 

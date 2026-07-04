@@ -87,7 +87,7 @@ set, zero-config JSON file store otherwise.
 // POST /api/auth/login     { email, password }
 // 200 → { "user": … } + session cookie · 401 bad credentials (constant-shaped)
 
-// GET /api/auth/me         → 200 { "user": … } | 401 { "user": null }
+// GET /api/auth/me         → 200 { "user": … } | 200 { "user": null } (guest)
 // POST /api/auth/logout    → clears the cookie
 ```
 

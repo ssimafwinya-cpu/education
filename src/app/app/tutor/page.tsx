@@ -5,13 +5,14 @@ import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Plus, MessageSquare, Sparkles, Trash2, Brain, Lightbulb,
-  ListChecks, CalendarDays, BookOpen, Square,
+  ListChecks, CalendarDays, BookOpen, Square, Mic,
 } from "lucide-react";
+import { sttSupported, listenOnce } from "@/lib/speech";
 import { useStore } from "@/lib/store";
 import { Markdown } from "@/components/markdown";
 import { EmptyState, ConfirmButton } from "@/components/ui";
 import { streamTutor } from "@/lib/ai/client";
-import { materialForContext } from "@/lib/selectors";
+import { retrieveContext } from "@/lib/ai/retrieval";
 import { cn, uid, formatRelative } from "@/lib/utils";
 import type { TutorThread } from "@/lib/types";
 
@@ -39,6 +40,21 @@ function TutorInner() {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [showList, setShowList] = useState(false);
+  const [micAvailable, setMicAvailable] = useState(false);
+  const [listening, setListening] = useState(false);
+  useEffect(() => setMicAvailable(sttSupported()), []);
+
+  const voiceInput = async () => {
+    if (listening) return;
+    setListening(true);
+    try {
+      const transcript = await listenOnce();
+      if (transcript) setInput((prev) => (prev ? prev + " " : "") + transcript);
+    } catch {
+      /* no speech / denied — nothing to do */
+    }
+    setListening(false);
+  };
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -87,7 +103,9 @@ function TutorInner() {
       .filter((m) => m.content)
       .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
 
-    const material = materialForContext(state, subject?.id ?? active?.subjectId ?? null);
+    // Query-aware grounding: rank the student's notes & cards against the
+    // question (BM25) and send only the most relevant chunks.
+    const material = retrieveContext(state, content, subject?.id ?? active?.subjectId ?? null);
     const controller = new AbortController();
     abortRef.current = controller;
 
@@ -203,6 +221,17 @@ function TutorInner() {
               className="input max-h-32 flex-1 resize-none"
               style={{ minHeight: 44 }}
             />
+            {micAvailable && (
+              <button
+                type="button"
+                onClick={voiceInput}
+                className={cn("btn-secondary shrink-0", listening && "animate-pulse-soft text-rose-500")}
+                title={listening ? "Listening…" : "Ask by voice"}
+                aria-label="Voice input"
+              >
+                <Mic size={16} />
+              </button>
+            )}
             {streaming ? (
               <button type="button" onClick={stop} className="btn-secondary shrink-0" title="Stop"><Square size={16} className="fill-current" /></button>
             ) : (
