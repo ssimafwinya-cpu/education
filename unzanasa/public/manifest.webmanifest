@@ -1,0 +1,19 @@
+{
+  "name": "UNZANASA — Digital Academic Ecosystem",
+  "short_name": "UNZANASA",
+  "description": "The University of Zambia Natural Sciences Student Association platform: association services + an AI-powered Academic Hub with discipline-specific science tools.",
+  "start_url": "/hub",
+  "display": "standalone",
+  "background_color": "#031d15",
+  "theme_color": "#0f766e",
+  "orientation": "portrait-primary",
+  "categories": ["education", "productivity", "science"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
