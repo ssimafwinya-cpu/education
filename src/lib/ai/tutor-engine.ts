@@ -23,6 +23,11 @@ export interface GeneratedQuestion {
   topic?: string;
 }
 
+export interface MindMapNode {
+  label: string;
+  children: MindMapNode[];
+}
+
 const STOPWORDS = new Set(
   "the a an and or but of to in on at for with as is are was were be been being this that these those it its by from into than then so such not no can will would should could may might must have has had do does did we you they he she i".split(
     " ",
@@ -186,6 +191,63 @@ export function generateQuiz(text: string, count = 5): GeneratedQuestion[] {
   return questions.slice(0, count);
 }
 
+/**
+ * Build a hierarchical mind map from study text.
+ * root → branches (key concepts / defined terms) → leaves (related detail).
+ * Deterministic and dependency-free.
+ */
+export function generateMindMap(text: string, rootLabel?: string, maxBranches = 6): MindMapNode {
+  const sentences = toSentences(text);
+  const defs = definitions(sentences);
+  const kw = keywords(text, 24);
+  const root = (rootLabel || kw[0] || "Topic").trim();
+
+  const capFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+  const shortLeaf = (s: string) => {
+    // Turn a sentence into a compact leaf phrase.
+    const words = s.split(/\s+/).slice(0, 8).join(" ");
+    return capFirst(words.replace(/[.,;:]$/, ""));
+  };
+
+  const branches: MindMapNode[] = [];
+  const usedTerms = new Set<string>();
+  // Words already covered by the root label don't deserve their own branch.
+  for (const w of root.toLowerCase().split(/\s+/)) usedTerms.add(w);
+
+  // 1) Prefer defined terms as branches — they're the load-bearing concepts.
+  for (const d of defs) {
+    if (branches.length >= maxBranches) break;
+    const term = capFirst(d.term);
+    const key = term.toLowerCase();
+    if (usedTerms.has(key) || key === root.toLowerCase()) continue;
+    usedTerms.add(key);
+    // Leaf: the keyword-rich fragment of the definition.
+    const leafWords = (d.definition.match(/[a-z][a-z-]{4,}/gi) ?? [])
+      .filter((w) => !STOPWORDS.has(w.toLowerCase()))
+      .slice(0, 3)
+      .map(capFirst);
+    branches.push({
+      label: term,
+      children: leafWords.length ? [{ label: leafWords.join(" · "), children: [] }] : [{ label: shortLeaf(d.definition), children: [] }],
+    });
+  }
+
+  // 2) Top up with frequent keywords, attaching a supporting sentence as a leaf.
+  for (const word of kw) {
+    if (branches.length >= maxBranches) break;
+    const key = word.toLowerCase();
+    if (usedTerms.has(key) || key === root.toLowerCase() || word.length < 4) continue;
+    const supporting = sentences.find((s) => new RegExp(`\\b${word}\\b`, "i").test(s));
+    usedTerms.add(key);
+    branches.push({
+      label: capFirst(word),
+      children: supporting ? [{ label: shortLeaf(supporting), children: [] }] : [],
+    });
+  }
+
+  return { label: capFirst(root), children: branches };
+}
+
 // ─── Conversational tutor (heuristic) ────────────────────────────────────────
 
 export interface TutorContext {
@@ -256,6 +318,10 @@ export function tutorReply(question: string, ctx: TutorContext = {}): string {
 
   if (/\b(flashcard|cards?)\b/.test(q)) {
     return "Open any note or deck and hit **Generate with AI** — I'll turn your material into flashcards (basic, cloze, MCQ) scheduled with spaced repetition automatically.";
+  }
+
+  if (/\b(mind ?map|concept map|diagram)\b/.test(q)) {
+    return "Head to the **Mind Maps** tab — paste any text or pick a note and I'll build an interactive concept map you can expand, collapse and export.";
   }
 
   // General fallback: an encouraging, structured study coach reply.

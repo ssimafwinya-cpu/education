@@ -23,7 +23,12 @@ Cognify combines the best of **ChatGPT + Anki + Quizlet + Notion + Duolingo** in
 | **Spaced Repetition** | Full FSRS memory model (stability + difficulty), learning/relearning steps, interval previews, review forecast. |
 | **Notes** | Markdown editor with live preview, version history, auto-save, and one-click AI summarise / flashcard generation. |
 | **Quizzes & Exams** | Auto-marked MCQ/short/fill/true-false. Timed exam mode with shuffling, leaderboard and answer review. |
+| **PDF Learning** | Upload textbooks/slides/papers — server-side text extraction (unpdf), then one-click flashcards, quizzes, summaries and mind maps. |
+| **Mind Maps** | Interactive radial concept maps generated from any note or text; expandable branches, SVG export. |
 | **Study Planner** | AI-generated, exam-aware weekly schedule that prioritises weak subjects and interleaves topics. |
+| **Social Learning** | Study groups, friends, shared decks and a community leaderboard. |
+| **Admin Console** | Role-gated platform metrics, user management, content moderation queue and audit log. |
+| **Onboarding** | 30-second first-run wizard: name, avatar, study goal → tuned daily targets. |
 | **Analytics** | Retention, accuracy, mastery-by-subject, review forecast, consistency heatmap, weak/strong topic detection. |
 | **Gamification** | XP, levels, coins, streaks and 16 achievements with live unlock toasts. |
 | **Design** | Glassmorphism, dark/light/system themes, Framer Motion animations, ⌘K command palette, fully responsive, WCAG-AA minded, PWA-ready. |

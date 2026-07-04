@@ -8,6 +8,7 @@ import {
   LayoutDashboard, BookOpen, StickyNote, Layers, Brain, ListChecks,
   GraduationCap, MessageSquare, CalendarDays, LineChart, Trophy, Settings,
   Search, Menu, X, Flame, Sun, Moon, Monitor, Sparkles, Command,
+  FileText, Network, Users, Shield,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useTheme } from "@/components/theme";
@@ -17,20 +18,58 @@ import { cn } from "@/lib/utils";
 import { ProgressRing } from "@/components/ui";
 import { useToast } from "@/components/ui";
 import { ACHIEVEMENTS } from "@/lib/store";
+import { Onboarding } from "@/components/onboarding";
 
-const NAV = [
-  { href: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/app/courses", label: "Courses", icon: BookOpen },
-  { href: "/app/notes", label: "Notes", icon: StickyNote },
-  { href: "/app/flashcards", label: "Flashcards", icon: Layers },
-  { href: "/app/review", label: "Review", icon: Brain, badge: "due" },
-  { href: "/app/quizzes", label: "Quizzes", icon: ListChecks },
-  { href: "/app/exams", label: "Exams", icon: GraduationCap },
-  { href: "/app/tutor", label: "AI Tutor", icon: MessageSquare },
-  { href: "/app/planner", label: "Planner", icon: CalendarDays },
-  { href: "/app/analytics", label: "Analytics", icon: LineChart },
-  { href: "/app/achievements", label: "Achievements", icon: Trophy },
-] as const;
+interface NavItem {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  exact?: boolean;
+  badge?: "due";
+}
+
+const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
+  {
+    title: "",
+    items: [{ href: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true }],
+  },
+  {
+    title: "Learn",
+    items: [
+      { href: "/app/courses", label: "Courses", icon: BookOpen },
+      { href: "/app/notes", label: "Notes", icon: StickyNote },
+      { href: "/app/pdf", label: "PDF Learning", icon: FileText },
+      { href: "/app/mindmaps", label: "Mind Maps", icon: Network },
+    ],
+  },
+  {
+    title: "Practice",
+    items: [
+      { href: "/app/flashcards", label: "Flashcards", icon: Layers },
+      { href: "/app/review", label: "Review", icon: Brain, badge: "due" },
+      { href: "/app/quizzes", label: "Quizzes", icon: ListChecks },
+      { href: "/app/exams", label: "Exams", icon: GraduationCap },
+    ],
+  },
+  {
+    title: "Plan & AI",
+    items: [
+      { href: "/app/tutor", label: "AI Tutor", icon: MessageSquare },
+      { href: "/app/planner", label: "Planner", icon: CalendarDays },
+    ],
+  },
+  {
+    title: "Progress",
+    items: [
+      { href: "/app/analytics", label: "Analytics", icon: LineChart },
+      { href: "/app/achievements", label: "Achievements", icon: Trophy },
+      { href: "/app/social", label: "Social", icon: Users },
+    ],
+  },
+];
+
+// Flattened list for the command palette.
+const NAV = NAV_SECTIONS.flatMap((s) => s.items);
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -91,20 +130,37 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </Link>
 
-      <nav className="mt-6 flex-1 space-y-1 overflow-y-auto pr-1">
-        {NAV.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item.href, "exact" in item ? item.exact : false);
-          return (
-            <Link key={item.href} href={item.href} className={cn("nav-link", active && "nav-link-active")}>
-              <Icon size={18} className={active ? "text-brand-500" : ""} />
-              <span className="flex-1">{item.label}</span>
-              {"badge" in item && item.badge === "due" && dueCount > 0 && (
-                <span className="chip bg-rose-500/15 text-rose-500 tabular-nums">{dueCount}</span>
-              )}
+      <nav className="mt-5 flex-1 space-y-3 overflow-y-auto pr-1">
+        {NAV_SECTIONS.map((section, si) => (
+          <div key={si}>
+            {section.title && (
+              <div className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-ink-faint">{section.title}</div>
+            )}
+            <div className="space-y-0.5">
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.href, "exact" in item ? item.exact : false);
+                return (
+                  <Link key={item.href} href={item.href} className={cn("nav-link", active && "nav-link-active")}>
+                    <Icon size={18} className={active ? "text-brand-500" : ""} />
+                    <span className="flex-1">{item.label}</span>
+                    {"badge" in item && item.badge === "due" && dueCount > 0 && (
+                      <span className="chip bg-rose-500/15 text-rose-500 tabular-nums">{dueCount}</span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+        {state.profile.role === "admin" && (
+          <div>
+            <div className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-ink-faint">Manage</div>
+            <Link href="/app/admin" className={cn("nav-link", isActive("/app/admin") && "nav-link-active")}>
+              <Shield size={18} /> <span>Admin</span>
             </Link>
-          );
-        })}
+          </div>
+        )}
       </nav>
 
       <Link
@@ -198,6 +254,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} onNavigate={(href) => { setPaletteOpen(false); router.push(href); }} />
+
+      {ready && !state.onboarded && <Onboarding />}
     </div>
   );
 }

@@ -126,6 +126,23 @@ export default function SettingsPage() {
         </div>
       </SettingsSection>
 
+      {/* Role (demo) */}
+      <SettingsSection icon={<Shield size={17} />} title="Role & access">
+        <p className="text-sm text-ink-muted">Switch roles to preview teacher and admin experiences. In production this is set by your account and institution.</p>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          {(["student", "teacher", "admin"] as const).map((r) => (
+            <button
+              key={r}
+              onClick={() => { dispatch({ type: "UPDATE_PROFILE", patch: { role: r } }); toast({ emoji: r === "admin" ? "🛡️" : r === "teacher" ? "🍎" : "🎓", title: `Role: ${r}` }); }}
+              className={cn("flex flex-col items-center gap-1 rounded-xl border-2 py-3 capitalize transition", state.profile.role === r ? "border-brand-500 bg-brand-500/10" : "border-edge hover:border-edge-strong")}
+            >
+              <span className="text-sm font-medium">{r}</span>
+              {r === "admin" && <span className="text-[10px] text-ink-faint">unlocks admin panel</span>}
+            </button>
+          ))}
+        </div>
+      </SettingsSection>
+
       {/* Data & privacy */}
       <SettingsSection icon={<Database size={17} />} title="Data & privacy">
         <p className="text-sm text-ink-muted">Your data is stored locally in your browser. Export a backup or import one anytime.</p>

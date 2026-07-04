@@ -4,11 +4,14 @@ export type ID = string;
 
 export type ThemeMode = "light" | "dark" | "system";
 
+export type UserRole = "student" | "teacher" | "admin";
+
 export interface UserProfile {
   id: ID;
   name: string;
   email: string;
   avatar: string; // emoji avatar
+  role: UserRole;
   joinedAt: number;
   settings: UserSettings;
 }

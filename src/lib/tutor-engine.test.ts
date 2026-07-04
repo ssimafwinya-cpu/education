@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  generateCards, generateQuiz, summarize, keywords, toSentences, tutorReply,
+  generateCards, generateQuiz, summarize, keywords, toSentences, tutorReply, generateMindMap,
 } from "./ai/tutor-engine";
 
 const SAMPLE = `The mitochondrion is the powerhouse of the cell. It produces ATP through cellular respiration.
@@ -76,6 +76,31 @@ describe("summarize", () => {
   });
   it("returns empty for empty input", () => {
     expect(summarize("", 5)).toEqual([]);
+  });
+});
+
+describe("generateMindMap", () => {
+  it("returns a root with branches from study text", () => {
+    const map = generateMindMap(SAMPLE, "Cell");
+    expect(map.label).toBe("Cell");
+    expect(map.children.length).toBeGreaterThan(0);
+    expect(map.children.length).toBeLessThanOrEqual(6);
+  });
+  it("branches carry a label and a children array", () => {
+    const map = generateMindMap(SAMPLE);
+    for (const branch of map.children) {
+      expect(typeof branch.label).toBe("string");
+      expect(branch.label.length).toBeGreaterThan(0);
+      expect(Array.isArray(branch.children)).toBe(true);
+    }
+  });
+  it("does not duplicate the root as a branch", () => {
+    const map = generateMindMap(SAMPLE, "cell");
+    expect(map.children.some((b) => b.label.toLowerCase() === "cell")).toBe(false);
+  });
+  it("respects the maxBranches limit", () => {
+    const map = generateMindMap(SAMPLE, "Biology", 3);
+    expect(map.children.length).toBeLessThanOrEqual(3);
   });
 });
 

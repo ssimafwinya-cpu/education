@@ -364,6 +364,7 @@ export function buildSeedState(name = "Alex Rivera", email = "you@cognify.app"):
       name,
       email,
       avatar: "🦊",
+      role: "student",
       joinedAt: now - 14 * 86400000,
       settings: DEFAULT_SETTINGS,
     },

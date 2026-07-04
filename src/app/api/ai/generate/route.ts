@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateCards, generateQuiz, summarize } from "@/lib/ai/tutor-engine";
+import { generateCards, generateQuiz, summarize, generateMindMap } from "@/lib/ai/tutor-engine";
 
 export const runtime = "nodejs";
 
 interface Body {
-  kind: "flashcards" | "quiz" | "summary";
+  kind: "flashcards" | "quiz" | "summary" | "mindmap";
   text: string;
   count?: number;
+  rootLabel?: string;
 }
 
 /**
@@ -37,6 +38,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ questions: generateQuiz(text, count) });
     case "summary":
       return NextResponse.json({ points: summarize(text, count) });
+    case "mindmap":
+      return NextResponse.json({ map: generateMindMap(text, body.rootLabel, Math.min(8, count)) });
     default:
       return NextResponse.json({ error: "Unknown kind" }, { status: 400 });
   }

@@ -3,7 +3,7 @@
 // Client-side helpers for talking to the AI routes.
 
 import type { ChatTurn } from "./providers";
-import type { GeneratedCard, GeneratedQuestion } from "./tutor-engine";
+import type { GeneratedCard, GeneratedQuestion, MindMapNode } from "./tutor-engine";
 
 export interface StreamOptions {
   messages: ChatTurn[];
@@ -63,3 +63,15 @@ export async function generateSummary(text: string, count = 6): Promise<string[]
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? "Generation failed");
   return (await res.json()).points as string[];
 }
+
+export async function generateMindMap(text: string, rootLabel?: string, count = 6): Promise<MindMapNode> {
+  const res = await fetch("/api/ai/generate", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ kind: "mindmap", text, rootLabel, count }),
+  });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? "Generation failed");
+  return (await res.json()).map as MindMapNode;
+}
+
+export type { MindMapNode };

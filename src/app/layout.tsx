@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme";
 import { StoreProvider } from "@/lib/store";
 import { ToastHost } from "@/components/ui";
+import { PwaRegister } from "@/components/pwa-register";
 
 export const metadata: Metadata = {
   title: "Cognify — AI Learning Platform",
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ToastHost>{children}</ToastHost>
           </StoreProvider>
         </ThemeProvider>
+        <PwaRegister />
       </body>
     </html>
   );

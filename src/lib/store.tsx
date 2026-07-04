@@ -133,7 +133,12 @@ function award(state: AppState, xp: number, coins = 0): AppState {
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case "HYDRATE":
-      return action.state;
+      // Defensive defaults so state persisted by an older version stays valid.
+      return {
+        ...action.state,
+        onboarded: action.state.onboarded ?? true,
+        profile: { ...action.state.profile, role: action.state.profile.role ?? "student" },
+      };
     case "RESET":
       return buildSeedState(state.profile.name, state.profile.email);
     case "SET_ONBOARDED":
