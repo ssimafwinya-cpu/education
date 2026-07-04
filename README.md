@@ -18,8 +18,11 @@ Cognify combines the best of **ChatGPT + Anki + Quizlet + Notion + Duolingo** in
 
 | Area | What you get |
 | --- | --- |
-| **AI Tutor** | Streaming chat, grounded in your own notes & decks, with subject context and conversation memory. Offline engine works with no API key. |
-| **Flashcards** | Basic, cloze, MCQ and true/false cards. AI generation from any text. Real **FSRS-4.5** scheduling. |
+| **AI Tutor** | Streaming chat grounded in your own notes & decks via **BM25 retrieval**, with subject context, voice questions, and conversation memory. Offline engine works with no API key. |
+| **Oral quiz mode** | The question is **read aloud**, you answer **by voice or typing**, and it's **graded instantly with spoken feedback** — hands-free studying. |
+| **Voice & audio** | Read notes/PDFs aloud, turn any deck into a **podcast** (Q→pause→A, auto-advancing), read-aloud on review cards. |
+| **PDF learning** | Upload textbooks/slides/papers; **highlight any text → one-click flashcard / explain / note / read-aloud**; plus AI flashcards, quizzes, summaries and mind maps. |
+| **Flashcards** | Basic, cloze, MCQ and true/false cards. AI generation, **Anki-compatible import/export**, duplicate protection. Real **FSRS-4.5** scheduling. |
 | **Spaced Repetition** | Full FSRS memory model (stability + difficulty), learning/relearning steps, interval previews, review forecast. |
 | **Notes** | Markdown editor with live preview, version history, auto-save, and one-click AI summarise / flashcard generation. |
 | **Quizzes & Exams** | Auto-marked MCQ/short/fill/true-false. Timed exam mode with shuffling, leaderboard and answer review. |
@@ -45,6 +48,8 @@ npm run dev
 ```
 
 That's it. The app persists to your browser's `localStorage`, seeded with realistic demo content (Biology, Calculus, World History) so every feature is immediately explorable.
+
+**👉 For the exact step-by-step (including optional live AI, database accounts, and how to use every voice/document feature), see [`docs/SETUP.md`](docs/SETUP.md).**
 
 ### Enable live AI (optional)
 

@@ -1,21 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Brain, Flame, Zap, Trophy, ArrowRight, CalendarDays, BookOpen,
   Clock, TrendingUp, Sparkles, StickyNote, Target, ChevronRight, AlertTriangle,
+  Layers, FileText, Lightbulb, Check, Send,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { PageHeader } from "@/components/page-header";
 import { Card, Progress, ProgressRing, Badge } from "@/components/ui";
 import { AreaChart, Heatmap } from "@/components/charts";
-import { levelProgress, levelTitle } from "@/lib/gamification";
+import { levelProgress, levelTitle, XP } from "@/lib/gamification";
 import {
-  dueCards, masteryBySubject, recentActivity, activityHeatmapValues, subjectStats,
+  dueCards, masteryBySubject, recentActivity, activityHeatmapValues, subjectStats, dueCountForDeck,
 } from "@/lib/selectors";
-import { formatRelative, subjectColor, cn, isoDate } from "@/lib/utils";
+import { formatRelative, subjectColor, cn, isoDate, addDays } from "@/lib/utils";
 
 const fade = {
   initial: { opacity: 0, y: 14 },
@@ -73,8 +75,20 @@ export default function Dashboard() {
         }
       />
 
+      {/* Ask-anything bar */}
+      <AskBar />
+
+      {/* Week strip */}
+      <WeekStrip />
+
+      {/* Quick actions */}
+      <QuickActions />
+
+      {/* Per-subject review queue */}
+      <ReviewQueue />
+
       {/* Top stat row */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
           { icon: Flame, label: "Day streak", value: state.game.streak.current, sub: `Best: ${state.game.streak.best}`, tone: "amber" },
           { icon: Zap, label: "XP today", value: todayXp, sub: `${state.game.xp.toLocaleString()} total`, tone: "brand" },
@@ -315,5 +329,156 @@ export default function Dashboard() {
         </Link>
       </motion.div>
     </div>
+  );
+}
+
+// ─── Ask-anything bar ────────────────────────────────────────────────────────
+function AskBar() {
+  const router = useRouter();
+  const [q, setQ] = useState("");
+  return (
+    <motion.form
+      {...fade}
+      onSubmit={(e) => { e.preventDefault(); if (q.trim()) router.push(`/app/tutor?q=${encodeURIComponent(q.trim())}`); }}
+      className="mb-5"
+    >
+      <div className="glass flex items-center gap-2 rounded-2xl border border-edge p-2 pl-4 shadow-soft focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-500/20">
+        <Sparkles size={18} className="shrink-0 text-brand-500" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Ask me anything — explain a topic, make flashcards, plan your week…"
+          className="flex-1 bg-transparent py-2 text-sm outline-none placeholder:text-ink-faint"
+        />
+        <button type="submit" disabled={!q.trim()} className="btn-primary btn-sm shrink-0"><Send size={15} /></button>
+      </div>
+    </motion.form>
+  );
+}
+
+// ─── Week strip (Mon–Sun with completion + streak flame) ─────────────────────
+function WeekStrip() {
+  const { state } = useStore();
+  const now = Date.now();
+  const todayIso = isoDate();
+
+  // Build the current week starting Monday.
+  const monday = (() => {
+    const d = new Date(now);
+    const dow = (d.getDay() + 6) % 7; // 0 = Monday
+    return addDays(d, -dow);
+  })();
+
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const date = addDays(monday, i);
+    const iso = isoDate(date);
+    const act = state.activity.find((a) => a.date === iso);
+    const active = !!act && (act.reviews > 0 || act.studyMinutes > 0 || act.quizQuestions > 0);
+    const isToday = iso === todayIso;
+    const future = date.getTime() > now && !isToday;
+    return { date, iso, active, isToday, future, label: date.toLocaleDateString(undefined, { weekday: "short" }), day: date.toLocaleDateString(undefined, { month: "short", day: "numeric" }) };
+  });
+
+  return (
+    <motion.div {...fade} className="mb-5">
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
+        {days.map((d) => (
+          <div
+            key={d.iso}
+            className={cn(
+              "flex flex-col items-center rounded-xl border p-2.5 text-center transition",
+              d.isToday ? "border-brand-500 bg-brand-500/5 ring-1 ring-brand-500/20" : "border-edge",
+              d.future && "opacity-50",
+            )}
+          >
+            <div className="text-xs font-semibold">{d.label}</div>
+            <div className="text-[10px] text-ink-faint">{d.day}</div>
+            <div className="mt-1.5">
+              {d.isToday ? (
+                <Flame size={16} className="text-amber-500" />
+              ) : d.active ? (
+                <span className="grid h-5 w-5 place-items-center rounded-full bg-teal-500 text-white"><Check size={12} /></span>
+              ) : d.future ? (
+                <span className="block h-5 w-5 rounded-full border border-dashed border-edge-strong" />
+              ) : (
+                <span className="grid h-5 w-5 place-items-center rounded-full bg-surface text-ink-faint">·</span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Quick actions ────────────────────────────────────────────────────────────
+function QuickActions() {
+  const actionsList = [
+    { icon: Layers, label: "Generate AI Flashcards", href: "/app/flashcards", tone: "brand" },
+    { icon: CalendarDays, label: "Create your Study Plan", href: "/app/planner", tone: "teal" },
+    { icon: FileText, label: "Upload a file", href: "/app/pdf", tone: "amber" },
+    { icon: Lightbulb, label: "Understand a topic", href: "/app/tutor", tone: "violet" },
+  ];
+  return (
+    <motion.div {...fade} className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {actionsList.map((a) => {
+        const Icon = a.icon;
+        return (
+          <Link key={a.label} href={a.href}>
+            <Card hover className="flex h-full items-center gap-3 py-4">
+              <div className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-xl", `bg-${a.tone}-500/12 text-${a.tone}-500`)}>
+                <Icon size={19} />
+              </div>
+              <span className="text-sm font-medium leading-tight">{a.label}</span>
+            </Card>
+          </Link>
+        );
+      })}
+    </motion.div>
+  );
+}
+
+// ─── Per-subject review queue with +XP estimates ─────────────────────────────
+function ReviewQueue() {
+  const { state } = useStore();
+  const now = Date.now();
+
+  const queue = useMemo(() => {
+    return state.decks
+      .map((deck) => {
+        const dueN = dueCountForDeck(state, deck.id, now);
+        const subject = state.subjects.find((s) => s.id === deck.subjectId);
+        // XP estimate: assume mostly-correct reviews.
+        const xp = dueN * Math.round((XP.reviewCardCorrect * 0.8 + XP.reviewCard * 0.2));
+        return { deck, subject, dueN, xp };
+      })
+      .filter((q) => q.dueN > 0)
+      .sort((a, b) => b.dueN - a.dueN)
+      .slice(0, 6);
+  }, [state, now]);
+
+  if (queue.length === 0) return null;
+
+  return (
+    <motion.div {...fade} className="mb-5">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 font-semibold"><Clock size={17} className="text-brand-500" /> Reviews due</h2>
+        <Link href="/app/review" className="btn-ghost btn-sm">Review all <ChevronRight size={14} /></Link>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {queue.map(({ deck, subject, dueN, xp }) => (
+          <Link key={deck.id} href={`/app/review?deck=${deck.id}`}>
+            <Card hover className="flex items-center gap-3 py-3.5">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-500/10 text-xl">{deck.emoji}</div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium">Review {dueN} flashcard{dueN > 1 ? "s" : ""}</div>
+                <div className="truncate text-xs text-ink-faint">{subject ? `${subject.emoji} ${subject.name}` : deck.name}</div>
+              </div>
+              <Badge tone="teal">+{xp}XP</Badge>
+            </Card>
+          </Link>
+        ))}
+      </div>
+    </motion.div>
   );
 }

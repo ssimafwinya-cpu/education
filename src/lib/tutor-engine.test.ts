@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   generateCards, generateQuiz, summarize, keywords, toSentences, tutorReply, generateMindMap,
+  cardFromSelection,
 } from "./ai/tutor-engine";
 
 const SAMPLE = `The mitochondrion is the powerhouse of the cell. It produces ATP through cellular respiration.
@@ -101,6 +102,30 @@ describe("generateMindMap", () => {
   it("respects the maxBranches limit", () => {
     const map = generateMindMap(SAMPLE, "Biology", 3);
     expect(map.children.length).toBeLessThanOrEqual(3);
+  });
+});
+
+describe("cardFromSelection", () => {
+  it("short selection becomes a cloze over its containing sentence", () => {
+    const card = cardFromSelection(SAMPLE, "powerhouse");
+    expect(card?.kind).toBe("cloze");
+    expect(card?.front).toContain("{{c1::powerhouse}}");
+    expect(card?.back).toBe("powerhouse");
+  });
+  it("long definition selection becomes a Q/A basic card", () => {
+    const card = cardFromSelection(SAMPLE, "The mitochondrion is the powerhouse of the cell and the site of ATP production");
+    expect(card?.kind).toBe("basic");
+    expect(card?.front.toLowerCase()).toContain("what is");
+    expect(card?.front.toLowerCase()).toContain("mitochondrion");
+  });
+  it("long non-definition selection becomes an explain card", () => {
+    const long = "Energy flows through the system in a continuous cascade of coupled reactions across membranes";
+    const card = cardFromSelection(SAMPLE, long);
+    expect(card?.kind).toBe("basic");
+    expect(card?.back).toBe(long);
+  });
+  it("returns null for a too-short selection", () => {
+    expect(cardFromSelection(SAMPLE, "a")).toBeNull();
   });
 });
 

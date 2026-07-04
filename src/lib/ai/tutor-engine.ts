@@ -248,6 +248,40 @@ export function generateMindMap(text: string, rootLabel?: string, maxBranches = 
   return { label: capFirst(root), children: branches };
 }
 
+/**
+ * Turn a highlighted selection into a flashcard.
+ * - Long selections (a full statement) become a definition/basic card.
+ * - Short selections become a cloze card over the sentence that contains them,
+ *   so the card carries enough context to be answerable.
+ */
+export function cardFromSelection(fullText: string, selection: string): GeneratedCard | null {
+  const sel = selection.replace(/\s+/g, " ").trim();
+  if (sel.length < 3) return null;
+
+  // Short phrase → cloze the containing sentence.
+  if (sel.length < 60) {
+    const sentences = toSentences(fullText);
+    const container = sentences.find((s) => s.toLowerCase().includes(sel.toLowerCase()));
+    if (container) {
+      const idx = container.toLowerCase().indexOf(sel.toLowerCase());
+      const original = container.slice(idx, idx + sel.length);
+      const front = container.slice(0, idx) + `{{c1::${original}}}` + container.slice(idx + sel.length);
+      return { kind: "cloze", front, back: original };
+    }
+    // No containing sentence found — fall back to a simple prompt card.
+    return { kind: "basic", front: `What is "${sel}"?`, back: "Fill in from your material." };
+  }
+
+  // Longer selection → try to split it into question/answer at a definition verb.
+  const m = sel.match(/^(.{4,80}?)\s+(?:is|are|refers to|means|describes)\s+(.{10,})$/i);
+  if (m) {
+    const term = m[1].replace(/^(a|an|the)\s+/i, "").trim();
+    return { kind: "basic", front: `What ${/s$/.test(term) ? "are" : "is"} ${term}?`, back: m[2].trim() };
+  }
+  // Otherwise a true/false style recall card of the statement itself.
+  return { kind: "basic", front: `Explain: ${sel.slice(0, 100)}${sel.length > 100 ? "…" : ""}`, back: sel };
+}
+
 // ─── Conversational tutor (heuristic) ────────────────────────────────────────
 
 export interface TutorContext {

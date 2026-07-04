@@ -3,17 +3,18 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, Play, ListChecks, Clock, History } from "lucide-react";
+import { ArrowLeft, Play, ListChecks, Clock, History, Headphones } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Card, Badge, EmptyState } from "@/components/ui";
 import { QuizRunner } from "@/components/quiz-runner";
+import { OralQuizRunner } from "@/components/oral-quiz";
 import { formatRelative } from "@/lib/utils";
 
 export default function QuizDetail() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { state } = useStore();
-  const [running, setRunning] = useState(false);
+  const [running, setRunning] = useState<false | "practice" | "oral">(false);
 
   const quiz = state.quizzes.find((q) => q.id === id);
   if (!quiz) return <EmptyState icon="🔍" title="Quiz not found" action={<Link href="/app/quizzes" className="btn-primary">Back to quizzes</Link>} />;
@@ -21,7 +22,8 @@ export default function QuizDetail() {
   const attempts = state.attempts.filter((a) => a.quizId === id).sort((a, b) => b.finishedAt - a.finishedAt);
   const subj = state.subjects.find((s) => s.id === quiz.subjectId);
 
-  if (running) return <div className="pt-2"><QuizRunner quiz={quiz} mode="practice" onExit={() => setRunning(false)} /></div>;
+  if (running === "practice") return <div className="pt-2"><QuizRunner quiz={quiz} mode="practice" onExit={() => setRunning(false)} /></div>;
+  if (running === "oral") return <div className="pt-2"><OralQuizRunner quiz={quiz} onExit={() => setRunning(false)} /></div>;
 
   return (
     <div>
@@ -37,7 +39,8 @@ export default function QuizDetail() {
           {quiz.source === "ai" && <Badge tone="brand">✨ AI-generated</Badge>}
         </div>
         <div className="mx-auto mt-6 flex max-w-xs flex-col gap-2">
-          <button onClick={() => setRunning(true)} className="btn-primary py-3"><Play size={17} /> Start practice</button>
+          <button onClick={() => setRunning("practice")} className="btn-primary py-3"><Play size={17} /> Start practice</button>
+          <button onClick={() => setRunning("oral")} className="btn-secondary"><Headphones size={15} /> Oral quiz — listen & answer</button>
           <button onClick={() => router.push(`/app/exams?quiz=${id}`)} className="btn-secondary"><Clock size={15} /> Take as timed exam</button>
         </div>
       </Card>

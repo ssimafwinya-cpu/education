@@ -11,6 +11,7 @@ import { useStore, actions } from "@/lib/store";
 import { PageHeader } from "@/components/page-header";
 import { Card, EmptyState, Modal, Badge, useToast } from "@/components/ui";
 import { Markdown } from "@/components/markdown";
+import { ListenButton } from "@/components/listen-button";
 import { generateFlashcards, generateSummary } from "@/lib/ai/client";
 import { cn, formatRelative } from "@/lib/utils";
 
@@ -153,6 +154,7 @@ function NotesInner() {
             <div className="flex flex-wrap items-center gap-2 border-b border-edge bg-surface/50 px-3 py-2">
               <span className="flex items-center gap-1 text-xs font-medium text-ink-faint"><Sparkles size={12} /> AI</span>
               <button onClick={() => setGenOpen(true)} className="btn-secondary btn-sm"><Layers size={13} /> Make flashcards</button>
+              <ListenButton text={active.content} />
               <SummarizeButton content={active.content} onSummary={(pts) => { dispatch({ type: "UPDATE_NOTE", id: active.id, patch: { content: active.content + "\n\n## AI Summary\n" + pts.map((p) => `- ${p}`).join("\n") }, snapshot: true }); toast({ emoji: "✨", title: "Summary added", description: "Appended to your note." }); }} />
             </div>
 

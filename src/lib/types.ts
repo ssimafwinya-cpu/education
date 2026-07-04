@@ -141,7 +141,7 @@ export interface QuizAttempt {
   quizId: ID;
   startedAt: number;
   finishedAt: number;
-  mode: "practice" | "exam";
+  mode: "practice" | "exam" | "oral";
   answers: { questionId: ID; given: string; correct: boolean }[];
   scorePercent: number;
 }

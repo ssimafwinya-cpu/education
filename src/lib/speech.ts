@@ -9,22 +9,89 @@ export function ttsSupported(): boolean {
 
 /** Read text aloud; stops any previous utterance first. */
 export function speak(text: string, opts?: { rate?: number; onEnd?: () => void }): void {
-  if (!ttsSupported()) return;
-  window.speechSynthesis.cancel();
+  if (!ttsSupported()) {
+    opts?.onEnd?.();
+    return;
+  }
   const clean = text
     .replace(/\{\{c\d+::(.*?)\}\}/g, "$1")
     .replace(/[#*_`>|]/g, "")
     .replace(/\s+/g, " ")
     .trim();
-  if (!clean) return;
-  const utterance = new SpeechSynthesisUtterance(clean);
-  utterance.rate = opts?.rate ?? 1;
-  if (opts?.onEnd) utterance.onend = opts.onEnd;
-  window.speechSynthesis.speak(utterance);
+  if (!clean) {
+    opts?.onEnd?.();
+    return;
+  }
+  // TTS must never break the UI: a failure just skips the audio and continues.
+  try {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(clean);
+    utterance.rate = opts?.rate ?? 1;
+    if (opts?.onEnd) utterance.onend = opts.onEnd;
+    utterance.onerror = () => opts?.onEnd?.();
+    window.speechSynthesis.speak(utterance);
+  } catch {
+    opts?.onEnd?.();
+  }
 }
 
 export function stopSpeaking(): void {
   if (ttsSupported()) window.speechSynthesis.cancel();
+}
+
+export interface SequenceController {
+  stop(): void;
+  skip(): void;
+}
+
+/**
+ * Speak a list of segments in order (podcast mode). Calls `onSegment` before
+ * each one so the UI can show progress, and `onDone` at the end. Returns a
+ * controller with stop/skip. Degrades to a no-op when TTS is unavailable.
+ */
+export function speakSequence(
+  segments: string[],
+  opts: { rate?: number; gapMs?: number; onSegment?: (index: number) => void; onDone?: () => void } = {},
+): SequenceController {
+  if (!ttsSupported() || segments.length === 0) {
+    opts.onDone?.();
+    return { stop() {}, skip() {} };
+  }
+  let index = 0;
+  let stopped = false;
+  let gapTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const playNext = () => {
+    if (stopped) return;
+    if (index >= segments.length) {
+      opts.onDone?.();
+      return;
+    }
+    const i = index++;
+    opts.onSegment?.(i);
+    speak(segments[i], {
+      rate: opts.rate,
+      onEnd: () => {
+        if (stopped) return;
+        gapTimer = setTimeout(playNext, opts.gapMs ?? 600);
+      },
+    });
+  };
+
+  playNext();
+
+  return {
+    stop() {
+      stopped = true;
+      if (gapTimer) clearTimeout(gapTimer);
+      stopSpeaking();
+    },
+    skip() {
+      if (gapTimer) clearTimeout(gapTimer);
+      stopSpeaking(); // onEnd of the cancelled utterance won't fire reliably; advance manually
+      if (!stopped) playNext();
+    },
+  };
 }
 
 // ─── Speech-to-text ──────────────────────────────────────────────────────────

@@ -44,6 +44,17 @@ function TutorInner() {
   const [listening, setListening] = useState(false);
   useEffect(() => setMicAvailable(sttSupported()), []);
 
+  // Deep-link a question: /app/tutor?q=… (used by highlight → "Explain").
+  const askedParam = useRef(false);
+  useEffect(() => {
+    const q = params.get("q");
+    if (q && !askedParam.current) {
+      askedParam.current = true;
+      send(q);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
+
   const voiceInput = async () => {
     if (listening) return;
     setListening(true);

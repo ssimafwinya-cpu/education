@@ -1,18 +1,21 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   FileText, Sparkles, Layers, ListChecks, StickyNote, Network,
-  Loader2, Check, X, FileUp, BookOpen,
+  Loader2, Check, X, FileUp, BookOpen, MessageSquare, Volume2, Highlighter,
 } from "lucide-react";
 import { useStore, actions } from "@/lib/store";
 import { PageHeader } from "@/components/page-header";
 import { Card, Badge, useToast } from "@/components/ui";
 import { MindMap } from "@/components/mindmap";
+import { ListenButton } from "@/components/listen-button";
 import {
   generateFlashcards, generateQuizQuestions, generateSummary, generateMindMap, type MindMapNode,
 } from "@/lib/ai/client";
+import { cardFromSelection } from "@/lib/ai/tutor-engine";
+import { speak } from "@/lib/speech";
 import { uid, cn } from "@/lib/utils";
 
 interface Extracted {
@@ -112,11 +115,15 @@ export default function PdfPage() {
                     <div className="text-xs text-ink-faint">{doc.pages} pages · {doc.chars.toLocaleString()} characters</div>
                   </div>
                 </div>
-                <button onClick={() => { setDoc(null); setMindmap(null); }} className="btn-ghost btn-sm"><X size={16} /></button>
+                <div className="flex items-center gap-1.5">
+                  <ListenButton text={doc.text.slice(0, 5000)} label="Listen" />
+                  <button onClick={() => { setDoc(null); setMindmap(null); }} className="btn-ghost btn-sm"><X size={16} /></button>
+                </div>
               </div>
-              <div className="mt-4 max-h-64 overflow-y-auto rounded-xl border border-edge bg-surface p-4 text-sm leading-relaxed text-ink-muted">
-                {doc.text.slice(0, 3000)}{doc.text.length > 3000 ? "…" : ""}
+              <div className="mt-3 flex items-center gap-1.5 text-xs text-ink-faint">
+                <Highlighter size={13} className="text-amber-500" /> Select any text below to make a flashcard, ask the tutor, save a highlight, or hear it read aloud.
               </div>
+              <HighlightableText doc={doc} />
             </Card>
 
             {mindmap && (
@@ -157,6 +164,102 @@ export default function PdfPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/** Extracted text with a floating highlight-to-action toolbar. */
+function HighlightableText({ doc }: { doc: Extracted }) {
+  const { state, dispatch } = useStore();
+  const router = useRouter();
+  const toast = useToast();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [selection, setSelection] = useState<{ text: string; x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const onMouseUp = () => {
+      const sel = window.getSelection();
+      const text = sel?.toString().trim() ?? "";
+      if (!text || text.length < 3 || !sel || sel.rangeCount === 0) {
+        setSelection(null);
+        return;
+      }
+      // Only react to selections inside our text pane.
+      const range = sel.getRangeAt(0);
+      if (!containerRef.current?.contains(range.commonAncestorContainer)) {
+        setSelection(null);
+        return;
+      }
+      const rect = range.getBoundingClientRect();
+      const host = containerRef.current.getBoundingClientRect();
+      setSelection({
+        text: text.slice(0, 500),
+        x: Math.max(8, rect.left - host.left + rect.width / 2),
+        y: Math.max(8, rect.top - host.top - 10),
+      });
+    };
+    document.addEventListener("mouseup", onMouseUp);
+    return () => document.removeEventListener("mouseup", onMouseUp);
+  }, []);
+
+  const clear = () => {
+    setSelection(null);
+    window.getSelection()?.removeAllRanges();
+  };
+
+  const makeFlashcard = () => {
+    if (!selection) return;
+    const card = cardFromSelection(doc.text, selection.text);
+    if (!card) return;
+    // Reuse the PDF's deck if one exists, otherwise create it.
+    const deckName = doc.name.replace(/\.pdf$/i, "");
+    let deck = state.decks.find((d) => d.name === deckName);
+    if (!deck) {
+      deck = actions.newDeck({ name: deckName, emoji: "📄", description: "Generated from PDF" });
+      dispatch({ type: "ADD_DECK", deck });
+    }
+    dispatch({ type: "ADD_CARDS", cards: [actions.newCard(deck.id, { front: card.front, back: card.back, kind: card.kind })] });
+    toast({ emoji: "🃏", title: "Flashcard created", description: `Added to “${deck.name}” and scheduled.` });
+    clear();
+  };
+
+  const explain = () => {
+    if (!selection) return;
+    router.push(`/app/tutor?q=${encodeURIComponent(`Explain this from ${doc.name}: "${selection.text.slice(0, 300)}"`)}`);
+  };
+
+  const saveHighlight = () => {
+    if (!selection) return;
+    const title = `Highlights — ${doc.name.replace(/\.pdf$/i, "")}`;
+    const existing = state.notes.find((n) => n.title === title);
+    if (existing) {
+      dispatch({ type: "UPDATE_NOTE", id: existing.id, patch: { content: existing.content + `\n> ${selection.text}\n` } });
+    } else {
+      dispatch({ type: "ADD_NOTE", note: actions.newNote({ title, content: `# ${title}\n\n> ${selection.text}\n`, tags: ["highlights", "pdf"] }) });
+    }
+    toast({ emoji: "🖍️", title: "Highlight saved", description: `Added to “${title}”.` });
+    clear();
+  };
+
+  return (
+    <div ref={containerRef} className="relative">
+      {selection && (
+        <div
+          className="absolute z-20 -translate-x-1/2 -translate-y-full"
+          style={{ left: selection.x, top: selection.y }}
+        >
+          <div className="glass flex items-center gap-0.5 rounded-xl p-1 shadow-lift">
+            <button onClick={makeFlashcard} className="btn-ghost btn-sm whitespace-nowrap" title="Create a flashcard from this selection"><Layers size={14} /> Flashcard</button>
+            <button onClick={explain} className="btn-ghost btn-sm whitespace-nowrap" title="Ask the AI tutor to explain"><MessageSquare size={14} /> Explain</button>
+            <button onClick={saveHighlight} className="btn-ghost btn-sm whitespace-nowrap" title="Save to your highlights note"><StickyNote size={14} /> Note</button>
+            <button onClick={() => { speak(selection.text); }} className="btn-ghost btn-sm" title="Read aloud"><Volume2 size={14} /></button>
+            <button onClick={clear} className="btn-ghost btn-sm" title="Dismiss"><X size={13} /></button>
+          </div>
+        </div>
+      )}
+      <div className="mt-2 max-h-72 select-text overflow-y-auto rounded-xl border border-edge bg-surface p-4 text-sm leading-relaxed text-ink-muted">
+        {doc.text.slice(0, 6000)}{doc.text.length > 6000 ? "…" : ""}
+      </div>
     </div>
   );
 }

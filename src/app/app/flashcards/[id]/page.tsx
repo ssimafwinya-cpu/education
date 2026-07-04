@@ -12,6 +12,7 @@ import { useStore, actions } from "@/lib/store";
 import { Card, Badge, EmptyState, Modal, useToast, ConfirmButton } from "@/components/ui";
 import { generateFlashcards } from "@/lib/ai/client";
 import { exportDeckTsv, parseDeckFile, dedupeAgainst } from "@/lib/deck-io";
+import { PodcastButton } from "@/components/podcast-player";
 import { currentRetention } from "@/lib/fsrs";
 import { cn, formatRelative } from "@/lib/utils";
 import type { CardKind, Flashcard } from "@/lib/types";
@@ -86,6 +87,7 @@ export default function DeckDetail() {
         <div className="flex flex-wrap gap-2">
           {due > 0 && <Link href={`/app/review?deck=${id}`} className="btn-primary"><Brain size={16} /> Review ({due})</Link>}
           <button onClick={() => setGenOpen(true)} className="btn-secondary"><Sparkles size={16} /> AI generate</button>
+          <PodcastButton deckName={deck.name} cards={cards} />
           <button onClick={() => setAdding(true)} className="btn-secondary"><Plus size={16} /> Add card</button>
           <button onClick={() => importRef.current?.click()} className="btn-ghost btn-sm" title="Import TSV/CSV (Anki-compatible)"><Upload size={15} /> Import</button>
           {cards.length > 0 && <button onClick={exportDeck} className="btn-ghost btn-sm" title="Export as Anki-compatible TSV"><Download size={15} /> Export</button>}
