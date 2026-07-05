@@ -9,6 +9,7 @@ import { MoleculeViewer } from "@/components/science/molecule-viewer";
 import { molarMass, parseFormula, balanceEquation, acidBase, molesFromMass, massFromMoles, molarity } from "@/lib/science/chemistry";
 import { fromSmiles, MOLECULE_PRESETS, SmilesError } from "@/lib/science/smiles";
 import { detectFunctionalGroups } from "@/lib/science/functional-groups";
+import { describeMolecule, lipinski } from "@/lib/science/descriptors";
 import { oxidationStates, combineIons, CATIONS, ANIONS, electronConfiguration, ionSymbol, elementByNumber } from "@/lib/science/inorganic";
 import { limitingReagent, percentYield, empiricalFormula, idealGas, weakAcidPH, pKa, type ReactantAmount } from "@/lib/science/reactions";
 import { titrationCurve, suggestIndicator, type TitrationKind } from "@/lib/science/titration";
@@ -84,6 +85,8 @@ function MoleculeStudio() {
     catch (e) { return { ok: false as const, error: e instanceof SmilesError ? e.message : "Could not parse structure" }; }
   }, [smiles]);
   const groups = result.ok ? detectFunctionalGroups(result.info) : [];
+  const desc = result.ok ? describeMolecule(result.info) : null;
+  const rule5 = desc ? lipinski(desc) : null;
 
   return (
     <Tool title="2D molecule studio (SMILES)" icon={<Hexagon size={17} className="text-accent-500" />}>
@@ -126,10 +129,38 @@ function MoleculeStudio() {
                   </div>
                 )}
               </div>
-              <div className="mt-4 rounded-lg border border-edge p-3 text-xs text-ink-muted">
-                <span className="font-semibold text-ink">Atoms:</span> {result.info.atoms.length} heavy · {result.info.hydrogens.reduce((s, h) => s + h, 0)} hydrogen ·
-                <span className="font-semibold text-ink"> Rings:</span> {result.info.ringAtoms.filter(Boolean).length > 0 ? "yes" : "none"}
-              </div>
+              {desc && (
+                <div className="mt-4">
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-faint">Molecular descriptors</div>
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                    <Descriptor label="Heavy atoms" value={desc.heavyAtoms} />
+                    <Descriptor label="H donors" value={desc.hBondDonors} />
+                    <Descriptor label="H acceptors" value={desc.hBondAcceptors} />
+                    <Descriptor label="Rotatable" value={desc.rotatableBonds} />
+                    <Descriptor label="Rings" value={desc.ringCount} />
+                    <Descriptor label="Aromatic C/N" value={desc.aromaticAtoms} />
+                  </div>
+                </div>
+              )}
+              {rule5 && (
+                <div className="mt-4 rounded-lg border border-edge p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-ink-faint">Lipinski rule of five</span>
+                    <Badge tone={rule5.passes ? "brand" : "crimson"}>
+                      {rule5.passes ? "Drug-like" : `${rule5.violations} violation${rule5.violations > 1 ? "s" : ""}`}
+                    </Badge>
+                  </div>
+                  <div className="mt-2 space-y-1">
+                    {rule5.criteria.map((c) => (
+                      <div key={c.label} className="flex items-center justify-between text-xs">
+                        <span className={c.ok ? "text-ink-muted" : "text-crimson-600"}>{c.ok ? "✓" : "✗"} {c.label}</span>
+                        <span className="font-mono text-ink">{Math.round(c.value * 100) / 100} <span className="text-ink-faint">({c.limit})</span></span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-[10px] text-ink-faint">logP is not estimated here, so it is excluded from this check.</p>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -140,6 +171,15 @@ function MoleculeStudio() {
 
 function subscript(formula: string): string {
   return formula.replace(/(\d+)/g, "<sub>$1</sub>");
+}
+
+function Descriptor({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg border border-edge bg-surface-raised px-2 py-1.5 text-center">
+      <div className="font-mono text-base font-bold text-accent-600 dark:text-accent-300">{value}</div>
+      <div className="text-[9px] leading-tight text-ink-faint">{label}</div>
+    </div>
+  );
 }
 
 // ─── Inorganic: oxidation states ─────────────────────────────────────────────
