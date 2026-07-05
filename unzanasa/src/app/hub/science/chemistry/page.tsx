@@ -10,6 +10,7 @@ import { molarMass, parseFormula, balanceEquation, acidBase, molesFromMass, mass
 import { fromSmiles, MOLECULE_PRESETS, SmilesError } from "@/lib/science/smiles";
 import { detectFunctionalGroups } from "@/lib/science/functional-groups";
 import { describeMolecule, lipinski } from "@/lib/science/descriptors";
+import { iupacName } from "@/lib/science/iupac";
 import { oxidationStates, combineIons, CATIONS, ANIONS, electronConfiguration, ionSymbol, elementByNumber } from "@/lib/science/inorganic";
 import { limitingReagent, percentYield, empiricalFormula, idealGas, weakAcidPH, pKa, type ReactantAmount } from "@/lib/science/reactions";
 import { titrationCurve, suggestIndicator, type TitrationKind } from "@/lib/science/titration";
@@ -87,6 +88,7 @@ function MoleculeStudio() {
   const groups = result.ok ? detectFunctionalGroups(result.info) : [];
   const desc = result.ok ? describeMolecule(result.info) : null;
   const rule5 = desc ? lipinski(desc) : null;
+  const iupac = result.ok ? iupacName(result.info) : null;
 
   return (
     <Tool title="2D molecule studio (SMILES)" icon={<Hexagon size={17} className="text-accent-500" />}>
@@ -117,6 +119,14 @@ function MoleculeStudio() {
                 <ResultRow label="Molar mass" value={`${result.info.mass} g/mol`} tone="accent" />
                 <ResultRow label="Unsaturation" value={result.info.degreeOfUnsaturation ?? "—"} tone="accent" />
               </div>
+              {iupac && ("name" in iupac ? (
+                <div className="mt-2 rounded-lg border border-accent-400/40 bg-accent-500/5 px-3 py-2">
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">IUPAC name</div>
+                  <div className="text-lg font-semibold text-accent-600 dark:text-accent-300">{iupac.name}</div>
+                </div>
+              ) : (
+                <p className="mt-2 text-[10px] text-ink-faint">Systematic name unavailable: {iupac.error}</p>
+              ))}
               <div className="mt-4">
                 <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-faint">Functional groups detected</div>
                 {groups.length === 0 ? (
