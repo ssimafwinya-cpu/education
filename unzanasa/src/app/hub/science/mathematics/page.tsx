@@ -1,15 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, Sigma, Grid3x3, BarChart3 } from "lucide-react";
+import { Calculator, Sigma, Grid3x3, BarChart3, LineChart } from "lucide-react";
 import { ToolHeader, Tool, Field, ResultRow, ResultBox } from "@/components/science/tool-kit";
+import { Grapher } from "@/components/science/grapher";
+import { SciCalc } from "@/components/science/sci-calc";
 import { solveQuadratic, determinant, matInverse, matMultiply, statistics } from "@/lib/science/mathematics";
 
 export default function MathLab() {
   return (
     <div>
-      <ToolHeader title="Mathematics AI Lab" subtitle="Solve equations, operate on matrices and analyse data — exact numerical results." icon={<Calculator size={22} />} tone="crimson" />
+      <ToolHeader title="Mathematics AI Lab" subtitle="Graph functions, solve equations, operate on matrices and analyse data — exact numerical results." icon={<Calculator size={22} />} tone="crimson" />
       <div className="grid gap-5 lg:grid-cols-2">
+        <Tool title="Graphing calculator" icon={<LineChart size={17} className="text-crimson-600" />} className="lg:col-span-2">
+          <Grapher />
+        </Tool>
+        <Tool title="Scientific calculator" icon={<Calculator size={17} className="text-crimson-600" />} className="lg:col-span-2">
+          <SciCalc />
+        </Tool>
         <Quadratic />
         <Stats />
         <MatrixTool />

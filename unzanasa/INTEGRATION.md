@@ -30,10 +30,11 @@ correctness-critical computation engines are pure and unit-tested
 | --- | --- | --- | --- |
 | **Chemistry** | `/hub/science/chemistry` | `chemistry.ts`, `periodic-table.ts` | Interactive 118-element periodic table, molar-mass calculator, **equation balancer** (matrix nullspace over rationals), pH/acid–base, stoichiometry |
 | **Physics** | `/hub/science/physics` | `physics.ts` | Projectile simulator (SVG trajectory), SUVAT kinematics solver, Ohm's law, unit converter, vector calculator, constants |
-| **Mathematics** | `/hub/science/mathematics` | `mathematics.ts` | Quadratic solver, matrix calculator (det/inverse/multiply), statistics, numerical calculus |
+| **Mathematics** | `/hub/science/mathematics` | `mathematics.ts`, `expression.ts` | **Graphing calculator** (multi-function SVG plotter with asymptote gaps), **scientific calculator** (safe shunting-yard evaluator, `ans` chaining), quadratic solver, matrix calculator (det/inverse/multiply), statistics, numerical calculus |
 | **Biology** | `/hub/science/biology` | `biology.ts` | DNA/RNA toolkit (complement, transcription, translation with the full codon table, GC content), Punnett squares, Hardy-Weinberg |
 | **Lab Assistant** | `/hub/science/lab` | `lab-report.ts` | AI lab-report generator (**never fabricates data** — organises student observations, flags missing sections), solution-prep (C₁V₁=C₂V₂) |
 | **Research Hub** | `/hub/science/research` | `citations.ts` | Citation generator in APA, Harvard, Vancouver, MLA & IEEE; DOI formatter |
+| **Computer Science** | `/hub/science/cs` | `algorithms.ts` | Sandboxed **JavaScript playground** (Web Worker, console capture, 3s hard timeout), animated **sorting visualizer** (bubble/selection/insertion with comparison/swap counters), **binary-search visualizer**, Big-O reference |
 
 Every tool computes real results (verified in-browser): glucose molar mass =
 180.156 g/mol, `H2 + O2 → H2O` balances to `2,1,2`, kinematics gives v = 19.6

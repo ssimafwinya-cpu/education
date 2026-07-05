@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   FlaskConical, Dna, Atom, Calculator, Microscope, BookOpen, Code2,
-  ArrowRight, Sparkles, Beaker,
+  ArrowRight, Sparkles,
 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Card, Badge } from "@/components/ui";
@@ -41,6 +41,11 @@ const DISCIPLINES = [
     desc: "Citation generator (APA/Harvard/Vancouver/MLA/IEEE), DOI formatter, reference organizer.",
     tools: ["Citations ×5", "DOI Lookup", "References"],
   },
+  {
+    href: "/hub/science/cs", icon: Code2, title: "Computer Science", tone: "violet",
+    desc: "Sandboxed JavaScript playground, animated sorting & binary-search visualizers, Big-O reference.",
+    tools: ["JS Playground", "Sort Visualizer", "Binary Search", "Big-O"],
+  },
 ];
 
 export default function ScienceHub() {
@@ -75,17 +80,6 @@ export default function ScienceHub() {
         })}
       </div>
 
-      {/* CS teaser */}
-      <div className="mt-6">
-        <Card className="flex flex-wrap items-center gap-4">
-          <div className="grid h-12 w-12 place-items-center rounded-xl bg-violet-500/12 text-violet-500"><Code2 size={24} /></div>
-          <div className="flex-1">
-            <h2 className="font-semibold">Computer Science tools</h2>
-            <p className="text-sm text-ink-muted">Code editor, algorithm visualizers and a programming tutor live inside the AI Tutor and Notes code blocks — with a dedicated CS workspace coming next.</p>
-          </div>
-          <Link href="/hub/tutor" className="btn-secondary"><Beaker size={15} /> Open AI Tutor</Link>
-        </Card>
-      </div>
     </div>
   );
 }
