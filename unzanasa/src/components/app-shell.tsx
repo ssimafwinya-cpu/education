@@ -9,7 +9,7 @@ import {
   GraduationCap, MessageSquare, CalendarDays, LineChart, Trophy, Settings,
   Search, Menu, X, Flame, Sun, Moon, Monitor, Sparkles, Command,
   FileText, Network, Users, Shield, Cloud, CloudOff, RefreshCw,
-  ArrowLeft, FlaskConical,
+  ArrowLeft, FlaskConical, ScrollText,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useAccount } from "@/lib/account";
@@ -46,6 +46,7 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
       { href: "/hub/courses", label: "Courses", icon: BookOpen },
       { href: "/hub/notes", label: "Notes", icon: StickyNote },
       { href: "/hub/pdf", label: "PDF Learning", icon: FileText },
+      { href: "/hub/past-papers", label: "Past Papers", icon: ScrollText },
       { href: "/hub/mindmaps", label: "Mind Maps", icon: Network },
     ],
   },

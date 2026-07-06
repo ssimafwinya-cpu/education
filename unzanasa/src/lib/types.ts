@@ -239,6 +239,22 @@ export interface Announcement {
   pinned?: boolean;
 }
 
+// ─── Past-paper bank (admin-curated) ─────────────────────────────────────────
+
+export type ExamKind = "Test" | "Final" | "Supplementary" | "Assignment";
+
+export interface PastPaper {
+  id: ID;
+  courseCode: string;
+  courseTitle: string;
+  year: number;
+  kind: ExamKind;
+  /** Optional label, e.g. "Test 1" or "Paper 2". */
+  label?: string;
+  /** Link to the paper (member portal, Drive, etc.). */
+  url?: string;
+}
+
 // ─── Root state ──────────────────────────────────────────────────────────────
 
 export interface AppState {
@@ -261,4 +277,6 @@ export interface AppState {
   community?: { events: EventItem[]; announcements: Announcement[] };
   /** Event ids this member has RSVP'd to (per-user). */
   rsvps?: ID[];
+  /** Admin-curated past-paper bank. */
+  pastPapers?: PastPaper[];
 }

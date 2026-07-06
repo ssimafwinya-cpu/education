@@ -9,6 +9,7 @@ import { addDays, isoDate, uid } from "./utils";
 import { emptyDay } from "./gamification";
 import { defaultProgrammes } from "./courses-catalogue";
 import { defaultEvents, defaultAnnouncements } from "./community";
+import { defaultPastPapers } from "./past-papers";
 
 export const DEFAULT_SETTINGS: UserSettings = {
   theme: "system",
@@ -516,5 +517,6 @@ export function buildSeedState(name = "Natural Sciences Student", email = "you@u
     catalogue: { programmes: defaultProgrammes() },
     community: { events: defaultEvents(now), announcements: defaultAnnouncements(now) },
     rsvps: [],
+    pastPapers: defaultPastPapers(),
   };
 }

@@ -68,7 +68,9 @@ type Action =
   // community (admin-managed events + announcements, per-user RSVP)
   | { type: "SET_EVENTS"; events: import("./types").EventItem[] }
   | { type: "SET_ANNOUNCEMENTS"; announcements: import("./types").Announcement[] }
-  | { type: "TOGGLE_RSVP"; eventId: string };
+  | { type: "TOGGLE_RSVP"; eventId: string }
+  // past-paper bank (admin-curated)
+  | { type: "SET_PAST_PAPERS"; papers: import("./types").PastPaper[] };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -343,6 +345,10 @@ function reducer(state: AppState, action: Action): AppState {
       const rsvps = state.rsvps ?? [];
       return { ...state, rsvps: rsvps.includes(action.eventId) ? rsvps.filter((id) => id !== action.eventId) : [...rsvps, action.eventId] };
     }
+
+    // past-paper bank
+    case "SET_PAST_PAPERS":
+      return { ...state, pastPapers: action.papers };
 
     default:
       return state;

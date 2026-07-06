@@ -79,6 +79,9 @@ Academic Hub (native module, one account):
   /hub                     dashboard
   /hub/science             Science Labs hub
   /hub/science/{biology,chemistry,physics,mathematics,lab,research}
+  /hub/past-papers         admin-curated past-paper bank (lib/past-papers.ts),
+                           browsable by course/year/type; admins add & edit
+                           papers inline (role-gated), students browse & open
   /hub/{courses,notes,pdf,mindmaps,flashcards,review,quizzes,exams,tutor,
         planner,analytics,achievements,social,admin,settings}
 
