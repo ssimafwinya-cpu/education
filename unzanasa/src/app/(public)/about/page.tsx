@@ -1,20 +1,6 @@
 import Link from "next/link";
 import { PageHero, Section, StatBand } from "@/components/public/sections";
-
-// The nine offices established by Article 8 of the UNZANASA Constitution,
-// with duties summarised from Articles 14–17. Officers are elected each
-// academic year (Articles 12–13).
-const EXEC = [
-  { role: "President", duty: "Presides over meetings, coordinates all Association activities, spokesperson and external affairs officer, account signatory." },
-  { role: "Vice-President", duty: "Deputises the President, chairs the Disciplinary Committee, succeeds automatically if the presidency falls vacant." },
-  { role: "Secretary General", duty: "Keeps minutes, handles all correspondence and registration matters, account signatory." },
-  { role: "Treasurer", duty: "Keeps the books, chairs the Financial Committee, presents the audited annual financial report." },
-  { role: "Project Co-ordinator", duty: "Oversees project proposals from ad-hoc committees and manages Association projects." },
-  { role: "Academic Affairs Secretary", duty: "Responds to students' academic plight and represents students academically at the School." },
-  { role: "Sports & Recreation Secretary", duty: "Oversees all sports and recreation activities of the Association." },
-  { role: "Publicity & Information Secretary", duty: "Publicises meetings and resolutions; runs the Association's email and social media." },
-  { role: "Committee Members (×2)", duty: "Perform duties as delegated by the Executive Committee." },
-];
+import { ExecCommittee } from "@/components/public/exec-committee";
 
 export default function About() {
   return (
@@ -37,15 +23,8 @@ export default function About() {
         ]} />
       </Section>
 
-      <Section id="executive" title="Executive Committee" subtitle="The nine offices established by Article 8 of the Constitution — elected by members each academic year, two weeks after the UNZASU elections.">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {EXEC.map((m) => (
-            <div key={m.role} className="card p-5">
-              <div className="font-semibold text-brand-600 dark:text-brand-300">{m.role}</div>
-              <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">{m.duty}</p>
-            </div>
-          ))}
-        </div>
+      <Section id="executive" title="Executive Committee" subtitle="The Article 8 offices — elected by members each academic year, two weeks after the UNZASU elections. Vacant seats show the office's constitutional duty.">
+        <ExecCommittee />
         <p className="mt-4 text-sm text-ink-muted">
           Eligibility, tenure and election rules are set out in Articles 9–13 of the{" "}
           <Link href="/constitution" className="font-medium text-brand-600 hover:underline dark:text-brand-300">Constitution</Link>.

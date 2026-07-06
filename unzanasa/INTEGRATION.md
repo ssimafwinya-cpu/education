@@ -56,6 +56,12 @@ Public site (association):
                            category/description) and announcements; the public
                            page and the hub dashboard read them live, and
                            members RSVP (stored per-account, synced).
+  /about#executive         current Executive Committee (lib/committee.ts): the
+                           Admin console's "Committee" tab records who holds
+                           each Article 8 office; the About page shows the
+                           holder (name + department) or the office's duty when
+                           vacant. Members set their own computer number,
+                           programme and year of study in hub Settings.
   /academics#courses       School of Natural Sciences academic structure
                            (lib/courses-catalogue.ts) modelled on how UNZA
                            actually works: a common first year (Biology

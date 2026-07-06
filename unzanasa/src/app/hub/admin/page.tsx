@@ -13,6 +13,7 @@ import { Card, Badge, Segmented, EmptyState, useToast } from "@/components/ui";
 import { AreaChart, BarChart, Donut } from "@/components/charts";
 import { AcademicHubEditor } from "@/components/admin/academic-hub-editor";
 import { CommunityEditor } from "@/components/admin/community-editor";
+import { CommitteeEditor } from "@/components/admin/committee-editor";
 import { cn } from "@/lib/utils";
 
 // The admin panel is role-gated (profile.role === "admin"). Metrics use
@@ -47,7 +48,7 @@ const AUDIT = [
 export default function AdminPage() {
   const { state, dispatch } = useStore();
   const toast = useToast();
-  const [tab, setTab] = useState<"overview" | "users" | "academic" | "community" | "moderation" | "audit">("overview");
+  const [tab, setTab] = useState<"overview" | "users" | "academic" | "community" | "committee" | "moderation" | "audit">("overview");
   const [query, setQuery] = useState("");
   const [suspended, setSuspended] = useState<Set<string>>(new Set(["sam@school.org"]));
   const [resolved, setResolved] = useState<Set<string>>(new Set());
@@ -87,6 +88,7 @@ export default function AdminPage() {
           { value: "users", label: "Users" },
           { value: "academic", label: "Academic Hub" },
           { value: "community", label: "Events & News" },
+          { value: "committee", label: "Committee" },
           { value: "moderation", label: <span className="flex items-center gap-1">Moderation {FLAGGED.length - resolved.size > 0 && <span className="chip bg-rose-500/15 text-rose-500">{FLAGGED.length - resolved.size}</span>}</span> },
           { value: "audit", label: "Audit log" },
         ]} />
@@ -156,6 +158,14 @@ export default function AdminPage() {
           <h3 className="mb-1 flex items-center gap-2 font-semibold"><CalendarDays size={16} className="text-brand-500" /> Events & announcements</h3>
           <p className="mb-4 text-sm text-ink-muted">Maintain the association calendar and notice board. Events appear on the public Events page and the hub dashboard; members can RSVP.</p>
           <CommunityEditor />
+        </Card>
+      )}
+
+      {tab === "committee" && (
+        <Card>
+          <h3 className="mb-1 flex items-center gap-2 font-semibold"><Users size={16} className="text-brand-500" /> Executive Committee</h3>
+          <p className="mb-4 text-sm text-ink-muted">Record who currently holds each Article 8 office. The committee is shown on the public About page.</p>
+          <CommitteeEditor />
         </Card>
       )}
 

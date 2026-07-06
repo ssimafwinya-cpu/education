@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { useAccount } from "@/lib/account";
+import { PROGRAMMES } from "@/lib/courses-catalogue";
 import { useTheme } from "@/components/theme";
 import { Cloud, CloudOff, RefreshCw } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
@@ -52,6 +53,29 @@ export default function SettingsPage() {
               <div><label className="mb-1 block text-xs font-medium text-ink-muted">Name</label><input value={state.profile.name} onChange={(e) => dispatch({ type: "UPDATE_PROFILE", patch: { name: e.target.value } })} className="input" /></div>
               <div><label className="mb-1 block text-xs font-medium text-ink-muted">Email</label><input value={state.profile.email} onChange={(e) => dispatch({ type: "UPDATE_PROFILE", patch: { email: e.target.value } })} className="input" /></div>
             </div>
+          </div>
+        </div>
+
+        {/* Academic details — the member record */}
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-ink-muted">Computer number</label>
+            <input value={state.profile.computerNumber ?? ""} onChange={(e) => dispatch({ type: "UPDATE_PROFILE", patch: { computerNumber: e.target.value } })} className="input font-mono" placeholder="e.g. 2021012345" />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-ink-muted">Programme</label>
+            <select value={state.profile.programme ?? ""} onChange={(e) => dispatch({ type: "UPDATE_PROFILE", patch: { programme: e.target.value || undefined } })} className="input">
+              <option value="">Select…</option>
+              <option value="Foundation (first year)">Foundation (first year)</option>
+              {PROGRAMMES.map((p) => <option key={p.name} value={p.name}>{p.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-ink-muted">Year of study</label>
+            <select value={state.profile.yearOfStudy ?? ""} onChange={(e) => dispatch({ type: "UPDATE_PROFILE", patch: { yearOfStudy: e.target.value ? Number(e.target.value) : undefined } })} className="input">
+              <option value="">Select…</option>
+              {[1, 2, 3, 4, 5, 6].map((y) => <option key={y} value={y}>Year {y}</option>)}
+            </select>
           </div>
         </div>
         <div className="mt-4">

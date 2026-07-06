@@ -70,7 +70,9 @@ type Action =
   | { type: "SET_ANNOUNCEMENTS"; announcements: import("./types").Announcement[] }
   | { type: "TOGGLE_RSVP"; eventId: string }
   // past-paper bank (admin-curated)
-  | { type: "SET_PAST_PAPERS"; papers: import("./types").PastPaper[] };
+  | { type: "SET_PAST_PAPERS"; papers: import("./types").PastPaper[] }
+  // executive committee (admin-managed)
+  | { type: "SET_COMMITTEE"; committee: import("./types").ExecMember[] };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -349,6 +351,10 @@ function reducer(state: AppState, action: Action): AppState {
     // past-paper bank
     case "SET_PAST_PAPERS":
       return { ...state, pastPapers: action.papers };
+
+    // executive committee
+    case "SET_COMMITTEE":
+      return { ...state, committee: action.committee };
 
     default:
       return state;

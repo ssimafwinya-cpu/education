@@ -14,6 +14,12 @@ export interface UserProfile {
   role: UserRole;
   joinedAt: number;
   settings: UserSettings;
+  /** UNZA student/computer number, e.g. "2021012345". */
+  computerNumber?: string;
+  /** Programme name (matches a catalogue programme, or "Foundation"). */
+  programme?: string;
+  /** Year of study, 1–6. */
+  yearOfStudy?: number;
 }
 
 export interface UserSettings {
@@ -279,4 +285,20 @@ export interface AppState {
   rsvps?: ID[];
   /** Admin-curated past-paper bank. */
   pastPapers?: PastPaper[];
+  /** Admin-managed executive committee (Article 8 offices → holders). */
+  committee?: ExecMember[];
+}
+
+// ─── Executive committee (admin-managed) ─────────────────────────────────────
+
+export interface ExecMember {
+  /** Stable office id (from the constitution's Article 8). */
+  id: ID;
+  office: string;
+  /** Current holder's name, empty when vacant. */
+  name: string;
+  /** Department / programme of the holder. */
+  affiliation?: string;
+  /** Contact email, optional. */
+  email?: string;
 }
