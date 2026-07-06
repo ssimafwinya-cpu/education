@@ -38,6 +38,12 @@ const Ctx = createContext<AccountCtx | null>(null);
 
 const PUSH_DEBOUNCE_MS = 2500;
 
+/** Map the server's user role onto the client profile role. */
+function roleToProfile(role: string): "student" | "teacher" | "admin" {
+  const r = role.toLowerCase();
+  return r === "admin" || r === "teacher" ? r : "student";
+}
+
 async function api<T>(path: string, init?: RequestInit): Promise<{ status: number; body: T }> {
   const res = await fetch(path, {
     ...init,
@@ -114,7 +120,12 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         setUser(body.user);
         setStatus("syncing");
         await pull();
-        if (!cancelled) setStatus("synced");
+        // Apply the server's role AFTER hydrating the snapshot, so a promotion
+        // (e.g. via set-role) always wins over the role stored in the snapshot.
+        if (!cancelled) {
+          dispatch({ type: "UPDATE_PROFILE", patch: { role: roleToProfile(body.user.role) } });
+          setStatus("synced");
+        }
       }
     })().catch(() => {});
     return () => { cancelled = true; };
@@ -171,11 +182,12 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       setUser(body.user);
       setStatus("syncing");
       await pull();
+      dispatch({ type: "UPDATE_PROFILE", patch: { role: roleToProfile(body.user.role) } });
       setStatus("synced");
       return { ok: true };
     }
     return { ok: false, error: body.error ?? "Login failed." };
-  }, [pull]);
+  }, [pull, dispatch]);
 
   const logout = useCallback(async () => {
     await api("/api/auth/logout", { method: "POST" }).catch(() => {});

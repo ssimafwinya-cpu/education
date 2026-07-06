@@ -86,9 +86,25 @@ Same as the base app — see the root `docs/SETUP.md`. From this directory:
 ```bash
 npm install      # (or reuse the parent's node_modules)
 npm run dev      # → http://localhost:3000
-npm test         # 198 tests (incl. 70+ science-engine tests)
-npm run build    # production build (50 routes)
+npm test         # 385 tests (incl. the science-engine suites)
+npm run build    # production build
 ```
+
+## Deploying it
+
+See `docs/DEPLOYMENT.md` for the full guide. In short:
+
+```bash
+npm run preflight    # validate env (fails the deploy on prod errors)
+npm run build && npm run start
+npm run set-role -- president@unzanasa.org ADMIN   # bootstrap the first admin
+```
+
+The app runs with zero external services (guest mode + file store) and scales
+up as you add `DATABASE_URL` (PostgreSQL), `RESEND_API_KEY` (email) and an AI
+key. Signed-in accounts take their role (student/teacher/admin) from the
+server, so `set-role` unlocks the admin console on next sign-in.
+`GET /api/health` reports store + DB readiness for uptime probes.
 
 Optional live AI (`.env` with a provider key) and Postgres-backed accounts
 (`DATABASE_URL` + `AUTH_SECRET`) work exactly as documented for the base app.
