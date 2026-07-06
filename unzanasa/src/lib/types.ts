@@ -218,6 +218,27 @@ export interface CatalogueProgramme {
   courses: CatalogueCourse[];
 }
 
+// ─── Community: events & announcements (admin-managed) ────────────────────────
+
+export interface EventItem {
+  id: ID;
+  title: string;
+  /** ISO date, e.g. "2026-03-14". */
+  date: string;
+  location: string;
+  category: string;
+  description?: string;
+}
+
+export interface Announcement {
+  id: ID;
+  title: string;
+  body: string;
+  /** ISO date the notice was posted. */
+  date: string;
+  pinned?: boolean;
+}
+
 // ─── Root state ──────────────────────────────────────────────────────────────
 
 export interface AppState {
@@ -236,4 +257,8 @@ export interface AppState {
   activity: DayActivity[];
   /** Admin-managed programme catalogue for the public academics page. */
   catalogue?: { programmes: CatalogueProgramme[] };
+  /** Admin-managed events + announcements (association notice board). */
+  community?: { events: EventItem[]; announcements: Announcement[] };
+  /** Event ids this member has RSVP'd to (per-user). */
+  rsvps?: ID[];
 }

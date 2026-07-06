@@ -1,36 +1,14 @@
 import { PageHero, Section } from "@/components/public/sections";
-import { CalendarDays, MapPin, Presentation, Users, Camera } from "lucide-react";
-
-const EVENTS = [
-  { date: "Mar 14", title: "UNZANASA Science Week", where: "Great East Road Campus", tag: "Flagship" },
-  { date: "Apr 02", title: "Undergraduate Research Symposium", where: "Natural Sciences Auditorium", tag: "Research" },
-  { date: "Apr 20", title: "STEM Careers Fair", where: "Main Library Lawns", tag: "Careers" },
-  { date: "May 09", title: "Inter-Department Sports Gala", where: "UNZA Sports Complex", tag: "Sports" },
-  { date: "May 25", title: "Community Science Outreach", where: "Lusaka Secondary Schools", tag: "Outreach" },
-  { date: "Jun 12", title: "End-of-Year Science Ball", where: "UNZA Grounds", tag: "Social" },
-];
+import { CalendarDays, Presentation, Users, Camera } from "lucide-react";
+import { EventsBoard } from "@/components/public/events-board";
 
 export default function Events() {
   return (
     <div>
       <PageHero eyebrow="Events" title="What's happening at UNZANASA" subtitle="Conferences, outreach, sports and social events across the academic year." />
 
-      <Section title="Upcoming events">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {EVENTS.map((e) => (
-            <article key={e.title} className="card card-hover p-5">
-              <div className="flex items-center justify-between">
-                <div className="grid h-12 w-12 place-items-center rounded-xl bg-brand-500/12 text-center text-brand-600 dark:text-brand-300">
-                  <span className="text-[10px] font-bold uppercase leading-none">{e.date.split(" ")[0]}</span>
-                  <span className="text-lg font-extrabold leading-none">{e.date.split(" ")[1]}</span>
-                </div>
-                <span className="chip bg-gold/15 text-gold-600">{e.tag}</span>
-              </div>
-              <h3 className="mt-3 font-semibold">{e.title}</h3>
-              <div className="mt-1 flex items-center gap-1.5 text-xs text-ink-muted"><MapPin size={12} /> {e.where}</div>
-            </article>
-          ))}
-        </div>
+      <Section>
+        <EventsBoard />
       </Section>
 
       <Section id="conferences" title="Conferences" subtitle="Flagship academic gatherings hosted by UNZANASA.">

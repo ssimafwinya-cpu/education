@@ -18,6 +18,8 @@ import {
   dueCards, masteryBySubject, recentActivity, activityHeatmapValues, subjectStats, dueCountForDeck,
 } from "@/lib/selectors";
 import { formatRelative, subjectColor, cn, isoDate, addDays } from "@/lib/utils";
+import { communityOf, upcomingEvents, eventDateParts, categoryTone } from "@/lib/community";
+import { MapPin } from "lucide-react";
 
 const fade = {
   initial: { opacity: 0, y: 14 },
@@ -313,6 +315,9 @@ export default function Dashboard() {
         </motion.div>
       )}
 
+      {/* Upcoming association events */}
+      <UpcomingEvents />
+
       {/* AI nudge */}
       <motion.div {...fade} transition={{ delay: 0.3 }} className="mt-5">
         <Link href="/hub/tutor">
@@ -434,6 +439,41 @@ function QuickActions() {
           </Link>
         );
       })}
+    </motion.div>
+  );
+}
+
+// ─── Upcoming association events ─────────────────────────────────────────────
+function UpcomingEvents() {
+  const { state } = useStore();
+  const events = upcomingEvents(communityOf(state).events).slice(0, 3);
+  if (events.length === 0) return null;
+  return (
+    <motion.div {...fade} transition={{ delay: 0.28 }} className="mt-5">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 font-semibold"><CalendarDays size={17} className="text-brand-500" /> Upcoming events</h2>
+        <Link href="/events" className="btn-ghost btn-sm">Full calendar <ChevronRight size={14} /></Link>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {events.map((e) => {
+          const d = eventDateParts(e.date);
+          const tone = categoryTone(e.category);
+          const going = Boolean(state.rsvps?.includes(e.id));
+          return (
+            <Card key={e.id} className="flex items-start gap-3">
+              <div className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-xl text-center", `bg-${tone}-500/12 text-${tone}-600`)}>
+                <span className="text-[9px] font-bold uppercase leading-none">{d.month}</span>
+                <span className="text-base font-extrabold leading-none">{d.day}</span>
+              </div>
+              <div className="min-w-0">
+                <div className="truncate text-sm font-semibold">{e.title}</div>
+                <div className="mt-0.5 flex items-center gap-1 text-xs text-ink-faint"><MapPin size={11} /> <span className="truncate">{e.location || "TBA"}</span></div>
+                {going && <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-brand-600 dark:text-brand-300"><Check size={11} /> Attending</span>}
+              </div>
+            </Card>
+          );
+        })}
+      </div>
     </motion.div>
   );
 }

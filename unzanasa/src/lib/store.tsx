@@ -17,6 +17,7 @@ import {
   ACHIEVEMENTS, bumpStreak, emptyDay, newlyUnlocked, XP,
 } from "./gamification";
 import { dedupeAgainst } from "./deck-io";
+import { communityOf } from "./community";
 import { isoDate, uid } from "./utils";
 
 const STORAGE_KEY = "unzanasa.state.v1";
@@ -63,7 +64,11 @@ type Action =
   | { type: "AWARD"; xp?: number; coins?: number }
   | { type: "LOG_ACTIVITY"; patch: Partial<import("./types").DayActivity> }
   // catalogue (admin-managed academic hub)
-  | { type: "SET_PROGRAMMES"; programmes: import("./types").CatalogueProgramme[] };
+  | { type: "SET_PROGRAMMES"; programmes: import("./types").CatalogueProgramme[] }
+  // community (admin-managed events + announcements, per-user RSVP)
+  | { type: "SET_EVENTS"; events: import("./types").EventItem[] }
+  | { type: "SET_ANNOUNCEMENTS"; announcements: import("./types").Announcement[] }
+  | { type: "TOGGLE_RSVP"; eventId: string };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -328,6 +333,16 @@ function reducer(state: AppState, action: Action): AppState {
     // catalogue (admin-managed academic hub)
     case "SET_PROGRAMMES":
       return { ...state, catalogue: { programmes: action.programmes } };
+
+    // community (events + announcements + rsvp)
+    case "SET_EVENTS":
+      return { ...state, community: { ...communityOf(state), events: action.events } };
+    case "SET_ANNOUNCEMENTS":
+      return { ...state, community: { ...communityOf(state), announcements: action.announcements } };
+    case "TOGGLE_RSVP": {
+      const rsvps = state.rsvps ?? [];
+      return { ...state, rsvps: rsvps.includes(action.eventId) ? rsvps.filter((id) => id !== action.eventId) : [...rsvps, action.eventId] };
+    }
 
     default:
       return state;

@@ -50,6 +50,12 @@ Public site (association):
                            /documents/UNZANASA-Constitution.pdf); the About
                            page's Executive Committee & governance sections are
                            derived from Articles 3–18
+  /events                  admin-managed events calendar + notice board
+                           (lib/community.ts): the Admin console's "Events &
+                           News" tab maintains events (title/date/location/
+                           category/description) and announcements; the public
+                           page and the hub dashboard read them live, and
+                           members RSVP (stored per-account, synced).
   /academics#courses       School of Natural Sciences academic structure
                            (lib/courses-catalogue.ts) modelled on how UNZA
                            actually works: a common first year (Biology

@@ -8,7 +8,7 @@ const config: Config = {
   // × utility combinations these components use so the colours survive the build.
   safelist: [
     {
-      pattern: /(bg|text|border|ring|fill|stroke)-(brand|accent|gold|crimson|violet|teal|amber|rose|sky|emerald|indigo|forest)-(400|500|600)/,
+      pattern: /(bg|text|border|ring|fill|stroke)-(brand|accent|gold|crimson|violet|teal|amber|rose|sky|emerald|indigo|forest)-(300|400|500|600)/,
       variants: ["hover", "dark", "group-hover"],
     },
     {
