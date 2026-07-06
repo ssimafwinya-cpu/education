@@ -1,99 +1,109 @@
-// ─── School of Natural Sciences — course catalogue ───────────────────────────
-// A reference list of the undergraduate courses offered under the School of
-// Natural Sciences, compiled from the departments. First-year foundation
-// courses have a dedicated stream for medical-programme students in Chemistry,
-// Physics and Mathematics. Course codes are shown where confirmed; where a
-// course is known by name only, the title is listed without a code.
+// ─── School of Natural Sciences — academic structure ─────────────────────────
+// A reference model of how study is organised in the UNZA School of Natural
+// Sciences, compiled from the departments:
 //
-// This is a living list — additions and corrections are welcome via the
+//   · Every first-year student takes the SAME four foundation courses
+//     (Biology, Chemistry, Mathematics, Physics). This common first year is
+//     also taken by students bound for health programmes at Ridgeway Campus and
+//     for Mines, Agriculture, Veterinary Medicine and Engineering — they pass
+//     through Natural Sciences in first year, then move to their school in
+//     second year. Health-programme students take designated stream variants of
+//     Chemistry, Physics and Mathematics.
+//   · From second year, a student follows their PROGRAMME, registering for the
+//     courses its home and contributing DEPARTMENTS require.
+//
+// Course codes are shown where confirmed; a course known by name only is listed
+// without a code. This is a living list — corrections are welcome via the
 // Academic Affairs Secretary.
 
-export interface CatalogueCourse {
-  code?: string;
-  title: string;
-  /** Marks the medical-programme stream of a first-year foundation course. */
-  medical?: boolean;
-}
+export const SCHOOL = {
+  name: "School of Natural Sciences",
+  university: "The University of Zambia",
+  campus: "Great East Road Campus",
+};
 
-export interface CatalogueDiscipline {
+// ─── Common first year ───────────────────────────────────────────────────────
+
+export interface FoundationCourse {
   discipline: string;
   emoji: string;
-  courses: CatalogueCourse[];
+  general: { code?: string; title: string };
+  /** Stream taken by health-programme (medical) students, where it differs. */
+  healthStream?: { code?: string; title: string };
 }
 
-export interface CatalogueYear {
-  year: string;
-  blurb: string;
-  disciplines: CatalogueDiscipline[];
-}
-
-export const COURSE_CATALOGUE: CatalogueYear[] = [
+export const FIRST_YEAR: FoundationCourse[] = [
+  { discipline: "Biology", emoji: "🧬", general: { code: "BIO 1400", title: "Introductory Biology" } },
   {
-    year: "First Year",
-    blurb: "Foundation courses taken across the School of Natural Sciences. Students on medical programmes follow dedicated Chemistry, Physics and Mathematics streams.",
-    disciplines: [
-      {
-        discipline: "Biology",
-        emoji: "🧬",
-        courses: [{ code: "BIO 1400", title: "Introductory Biology" }],
-      },
-      {
-        discipline: "Chemistry",
-        emoji: "⚗️",
-        courses: [
-          { code: "CHE 1000", title: "Introductory Chemistry" },
-          { code: "CHE 1010", title: "Chemistry (medical stream)", medical: true },
-        ],
-      },
-      {
-        discipline: "Physics",
-        emoji: "🔭",
-        courses: [
-          { code: "PHY 1010", title: "Introductory Physics" },
-          { code: "PHY 1015", title: "Physics (medical stream)", medical: true },
-        ],
-      },
-      {
-        discipline: "Mathematics",
-        emoji: "📐",
-        courses: [
-          { code: "MAT 1100", title: "Foundation Mathematics" },
-          { title: "Mathematics (medical stream)", medical: true },
-        ],
-      },
-    ],
+    discipline: "Chemistry", emoji: "⚗️",
+    general: { code: "CHE 1000", title: "Introductory Chemistry" },
+    healthStream: { code: "CHE 1010", title: "Chemistry (health stream)" },
   },
   {
-    year: "Second Year",
-    blurb: "Departmental courses that build on the first-year foundation, deepening theory and laboratory work in the chemical and biological sciences.",
-    disciplines: [
-      {
-        discipline: "Chemistry",
-        emoji: "⚗️",
-        courses: [
-          { title: "Inorganic Chemistry" },
-          { title: "Basic Organic Chemistry" },
-          { title: "Arene Chemistry" },
-          { title: "Analytical & Inorganic Chemistry" },
-        ],
-      },
-      {
-        discipline: "Biological Sciences",
-        emoji: "🧫",
-        courses: [
-          { title: "Plant Diversity" },
-          { title: "Animal Diversity" },
-          { title: "Microbiology" },
-          { title: "Biochemistry" },
-          { title: "Basic Physiology (plant & human)" },
-        ],
-      },
-    ],
+    discipline: "Physics", emoji: "🔭",
+    general: { code: "PHY 1010", title: "Introductory Physics" },
+    healthStream: { code: "PHY 1015", title: "Physics (health stream)" },
+  },
+  {
+    discipline: "Mathematics", emoji: "📐",
+    general: { code: "MAT 1100", title: "Foundation Mathematics" },
+    healthStream: { title: "Mathematics (health stream)" },
   },
 ];
 
-/** Total number of catalogued courses (for summary counts). */
-export const CATALOGUE_COURSE_COUNT = COURSE_CATALOGUE.reduce(
-  (n, y) => n + y.disciplines.reduce((m, d) => m + d.courses.length, 0),
-  0,
-);
+// ─── Departments ─────────────────────────────────────────────────────────────
+
+export interface Department {
+  name: string;
+  emoji: string;
+  blurb: string;
+}
+
+export const DEPARTMENTS: Department[] = [
+  { name: "Biological Sciences", emoji: "🧬", blurb: "Cell biology, diversity, physiology and microbiology." },
+  { name: "Chemistry", emoji: "⚗️", blurb: "Inorganic, organic, physical and analytical chemistry." },
+  { name: "Physics", emoji: "🔭", blurb: "Mechanics, electromagnetism, thermodynamics and modern physics." },
+  { name: "Mathematics & Statistics", emoji: "📐", blurb: "Analysis, algebra, statistics and actuarial methods." },
+  { name: "Computer Science", emoji: "💻", blurb: "Programming, algorithms, systems and data." },
+];
+
+// ─── Programmes ──────────────────────────────────────────────────────────────
+
+export interface ProgrammeCourse {
+  code?: string;
+  title: string;
+  /** Department that offers the course. */
+  dept: string;
+}
+
+export interface Programme {
+  name: string;
+  emoji: string;
+  /** Second-year courses, when the programme's list has been confirmed. */
+  secondYear?: ProgrammeCourse[];
+}
+
+export const PROGRAMMES: Programme[] = [
+  {
+    name: "Microbiology",
+    emoji: "🦠",
+    secondYear: [
+      { title: "Plant Diversity", dept: "Biological Sciences" },
+      { title: "Animal Diversity", dept: "Biological Sciences" },
+      { title: "Basic Physiology (plant & human)", dept: "Biological Sciences" },
+      { title: "Microbiology", dept: "Biological Sciences" },
+      { title: "Biochemistry", dept: "Biological Sciences" },
+      { title: "Basic Organic Chemistry", dept: "Chemistry" },
+      { title: "Arene Chemistry", dept: "Chemistry" },
+      { title: "Analytical & Inorganic Chemistry", dept: "Chemistry" },
+    ],
+  },
+  { name: "Biochemistry", emoji: "🧪" },
+  { name: "Chemistry", emoji: "⚗️" },
+  { name: "Physics", emoji: "🔭" },
+  { name: "Geology", emoji: "🪨" },
+  { name: "Computer Science", emoji: "💻" },
+  { name: "Actuarial Science", emoji: "📊" },
+];
+
+export const FOUNDATION_COURSE_COUNT = FIRST_YEAR.length;

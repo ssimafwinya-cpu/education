@@ -50,13 +50,18 @@ Public site (association):
                            /documents/UNZANASA-Constitution.pdf); the About
                            page's Executive Committee & governance sections are
                            derived from Articles 3–18
-  /academics#courses       School of Natural Sciences course catalogue
-                           (lib/courses-catalogue.ts): real first-year courses
-                           (BIO 1400, CHE 1000, PHY 1010, MAT 1100) with the
-                           medical-programme streams (CHE 1010, PHY 1015) and
-                           the second-year Chemistry & Biological Sciences
-                           courses. The hub's starter content (lib/seed.ts) is
-                           seeded from the same first-year courses.
+  /academics#courses       School of Natural Sciences academic structure
+                           (lib/courses-catalogue.ts) modelled on how UNZA
+                           actually works: a common first year (Biology
+                           BIO 1400, Chemistry CHE 1000, Physics PHY 1010,
+                           Mathematics MAT 1100) taken by every NS student and
+                           by pass-through students bound for health / mines /
+                           agriculture / vet / engineering, with health-stream
+                           variants (CHE 1010, PHY 1015, medical maths); the 5
+                           departments; and the 7 programmes, with Microbiology's
+                           second-year courses detailed by contributing
+                           department. The hub's starter content (lib/seed.ts)
+                           seeds exactly the four common first-year courses.
 
 Academic Hub (native module, one account):
   /hub                     dashboard

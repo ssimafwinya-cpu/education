@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { PageHero, Section, FeatureGrid } from "@/components/public/sections";
 import { GraduationCap, BookOpen, Newspaper, MessagesSquare, BarChart3, FlaskConical, ArrowRight, Stethoscope } from "lucide-react";
-import { COURSE_CATALOGUE, CATALOGUE_COURSE_COUNT } from "@/lib/courses-catalogue";
+import { FIRST_YEAR, DEPARTMENTS, PROGRAMMES } from "@/lib/courses-catalogue";
+
+function CourseCode({ code }: { code?: string }) {
+  return code
+    ? <span className="shrink-0 rounded-md bg-brand-500/12 px-1.5 py-0.5 font-mono text-xs font-semibold text-brand-600 dark:text-brand-300">{code}</span>
+    : <span className="shrink-0 rounded-md border border-edge px-1.5 py-0.5 font-mono text-[10px] text-ink-faint">—</span>;
+}
 
 export default function Academics() {
   return (
@@ -21,40 +27,81 @@ export default function Academics() {
         ]} />
       </Section>
 
-      <Section id="courses" title="Course catalogue" subtitle={`${CATALOGUE_COURSE_COUNT} undergraduate courses across the School of Natural Sciences — compiled from the departments. Medical-programme students follow dedicated first-year streams.`}>
-        <div className="space-y-8">
-          {COURSE_CATALOGUE.map((yr) => (
-            <div key={yr.year}>
-              <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h3 className="text-lg font-bold text-forest dark:text-brand-300">{yr.year}</h3>
-                <p className="text-sm text-ink-muted">{yr.blurb}</p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {yr.disciplines.map((disc) => (
-                  <div key={disc.discipline} className="card p-5">
-                    <div className="mb-3 flex items-center gap-2 font-semibold">
-                      <span className="text-lg">{disc.emoji}</span> {disc.discipline}
-                    </div>
-                    <ul className="space-y-2">
-                      {disc.courses.map((c) => (
-                        <li key={(c.code ?? "") + c.title} className="flex items-start gap-2 text-sm">
-                          {c.code
-                            ? <span className="mt-0.5 shrink-0 rounded-md bg-brand-500/12 px-1.5 py-0.5 font-mono text-xs font-semibold text-brand-600 dark:text-brand-300">{c.code}</span>
-                            : <span className="mt-0.5 shrink-0 rounded-md border border-edge px-1.5 py-0.5 font-mono text-[10px] text-ink-faint">—</span>}
-                          <span className="text-ink-muted">
-                            {c.title}
-                            {c.medical && <span className="ml-1.5 inline-flex items-center gap-0.5 align-middle text-xs text-crimson-600"><Stethoscope size={11} /> medical</span>}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
+      <Section id="courses" title="How study is organised" subtitle="Every student in the School of Natural Sciences shares a common first year, then specialises by programme from second year.">
+        {/* Common first year */}
+        <div className="mb-8">
+          <h3 className="mb-1 text-lg font-bold text-forest dark:text-brand-300">Common first year</h3>
+          <p className="mb-4 max-w-3xl text-sm text-ink-muted">
+            All first-year students take the same four foundation courses. This year is also taken by students bound for
+            health programmes at Ridgeway Campus and for Mines, Agriculture, Veterinary Medicine and Engineering — they
+            pass through Natural Sciences in first year, then move to their school in second year. Health-programme
+            students take designated <span className="inline-flex items-center gap-0.5 text-crimson-600"><Stethoscope size={12} /> health-stream</span> variants of Chemistry, Physics and Mathematics.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {FIRST_YEAR.map((f) => (
+              <div key={f.discipline} className="card p-5">
+                <div className="mb-3 flex items-center gap-2 font-semibold"><span className="text-lg">{f.emoji}</span> {f.discipline}</div>
+                <div className="flex items-start gap-2 text-sm">
+                  <CourseCode code={f.general.code} />
+                  <span className="text-ink-muted">{f.general.title}</span>
+                </div>
+                {f.healthStream && (
+                  <div className="mt-2 flex items-start gap-2 text-sm">
+                    <CourseCode code={f.healthStream.code} />
+                    <span className="text-ink-muted">{f.healthStream.title}
+                      <Stethoscope size={11} className="ml-1 inline align-middle text-crimson-600" />
+                    </span>
                   </div>
-                ))}
+                )}
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-        <p className="mt-5 text-xs text-ink-faint">A living list — additions and corrections are welcome via the Academic Affairs Secretary. Courses shown without a code are known by title pending confirmation.</p>
+
+        {/* Departments */}
+        <div className="mb-8">
+          <h3 className="mb-1 text-lg font-bold text-forest dark:text-brand-300">Departments</h3>
+          <p className="mb-4 max-w-3xl text-sm text-ink-muted">From second year, courses are delivered by the School&apos;s five departments.</p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {DEPARTMENTS.map((d) => (
+              <div key={d.name} className="card p-4">
+                <div className="text-lg">{d.emoji}</div>
+                <div className="mt-1 font-semibold leading-tight">{d.name}</div>
+                <p className="mt-1 text-xs text-ink-muted">{d.blurb}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Programmes */}
+        <div>
+          <h3 className="mb-1 text-lg font-bold text-forest dark:text-brand-300">Programmes</h3>
+          <p className="mb-4 max-w-3xl text-sm text-ink-muted">From second year a student follows their programme, registering for the courses its contributing departments require.</p>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {PROGRAMMES.map((p) => (
+              <div key={p.name} className={`card p-5 ${p.secondYear ? "lg:col-span-2" : ""}`}>
+                <div className="flex items-center gap-2 font-semibold"><span className="text-lg">{p.emoji}</span> {p.name}
+                  {!p.secondYear && <span className="ml-auto text-xs text-ink-faint">course list being compiled</span>}
+                </div>
+                {p.secondYear && (
+                  <>
+                    <div className="mt-1 text-xs font-medium uppercase tracking-wide text-ink-faint">Second-year courses</div>
+                    <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                      {p.secondYear.map((c) => (
+                        <div key={c.title} className="flex items-start gap-2 text-sm">
+                          <CourseCode code={c.code} />
+                          <span className="text-ink-muted">{c.title} <span className="text-ink-faint">· {c.dept}</span></span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p className="mt-6 text-xs text-ink-faint">A living list — additions and corrections are welcome via the Academic Affairs Secretary. Courses shown without a code (—) are known by title pending confirmation.</p>
       </Section>
 
       <Section id="research" title="Research Corner" subtitle="Tools and support for undergraduate research.">
