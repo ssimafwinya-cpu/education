@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FlaskConical, Scale, Calculator, Droplets, TableProperties, Hexagon, Atom, Zap, Beaker, Wind, FlaskRound } from "lucide-react";
+import { FlaskConical, Scale, Calculator, Droplets, TableProperties, Hexagon, Atom, Zap, Beaker, Wind, FlaskRound, PenTool } from "lucide-react";
 import { ToolHeader, Tool, Field, ResultRow, ResultBox } from "@/components/science/tool-kit";
 import { Segmented, Badge } from "@/components/ui";
 import { PeriodicTable } from "@/components/science/periodic-table";
 import { MoleculeViewer } from "@/components/science/molecule-viewer";
+import { MoleculeSketcher } from "@/components/science/molecule-sketcher";
 import { molarMass, parseFormula, balanceEquation, acidBase, molesFromMass, massFromMoles, molarity } from "@/lib/science/chemistry";
 import { fromSmiles, MOLECULE_PRESETS, SmilesError } from "@/lib/science/smiles";
 import { detectFunctionalGroups } from "@/lib/science/functional-groups";
@@ -33,6 +34,9 @@ export default function ChemistryLab() {
       {tab === "organic" && (
         <div className="grid gap-5">
           <MoleculeStudio />
+          <Tool title="Molecule sketcher (click to draw)" icon={<PenTool size={17} className="text-accent-500" />}>
+            <MoleculeSketcher />
+          </Tool>
           <div className="grid gap-5 lg:grid-cols-2">
             <MolarMass />
             <PhCalc />
