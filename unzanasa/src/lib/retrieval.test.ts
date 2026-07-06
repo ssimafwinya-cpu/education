@@ -40,11 +40,11 @@ describe("buildCorpus", () => {
     expect(corpus.some((c) => c.source.startsWith("deck:"))).toBe(true);
   });
   it("filters by subject", () => {
-    const bio = state.subjects.find((s) => s.name === "Biology")!;
+    const bio = state.subjects.find((s) => s.name.includes("Biology"))!;
     const corpus = buildCorpus(state, bio.id);
     expect(corpus.length).toBeGreaterThan(0);
-    // No History content should leak into the Biology corpus.
-    expect(corpus.some((c) => c.text.includes("Berlin Wall"))).toBe(false);
+    // No content from other subjects should leak into the Biology corpus.
+    expect(corpus.some((c) => c.text.includes("Ohm's law"))).toBe(false);
   });
   it("unmasks cloze deletions in card text", () => {
     const corpus = buildCorpus(state);
@@ -61,9 +61,9 @@ describe("rankChunks (BM25)", () => {
     expect(top.length).toBeGreaterThan(0);
     expect(top[0].text.toLowerCase()).toMatch(/mitochondri|powerhouse/);
   });
-  it("finds history content for a history question", () => {
-    const top = rankChunks("when did the Berlin Wall fall", corpus, 5);
-    expect(top[0].text).toMatch(/Berlin Wall|1989/);
+  it("finds physics content for a mechanics question", () => {
+    const top = rankChunks("newton second law force mass acceleration", corpus, 5);
+    expect(top[0].text.toLowerCase()).toMatch(/newton|force|acceleration/);
   });
   it("returns empty for queries with no matching terms", () => {
     expect(rankChunks("zzyzx quixotic frobnicate", corpus, 5)).toHaveLength(0);

@@ -37,6 +37,7 @@ const NAV: NavItem[] = [
     href: "/academics",
     drop: [
       { label: "Academic Hub", href: "/hub" },
+      { label: "Course Catalogue", href: "/academics#courses" },
       { label: "Research Corner", href: "/academics#research" },
       { label: "News & Blog", href: "/academics#news" },
       { label: "Discussion Forum", href: "/academics#forum" },

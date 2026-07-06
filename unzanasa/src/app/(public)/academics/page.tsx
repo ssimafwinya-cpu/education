@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageHero, Section, FeatureGrid } from "@/components/public/sections";
-import { GraduationCap, BookOpen, Newspaper, MessagesSquare, BarChart3, FlaskConical, ArrowRight } from "lucide-react";
+import { GraduationCap, BookOpen, Newspaper, MessagesSquare, BarChart3, FlaskConical, ArrowRight, Stethoscope } from "lucide-react";
+import { COURSE_CATALOGUE, CATALOGUE_COURSE_COUNT } from "@/lib/courses-catalogue";
 
 export default function Academics() {
   return (
@@ -18,6 +19,42 @@ export default function Academics() {
           { icon: <MessagesSquare size={20} />, title: "Discussion Forum", desc: "Ask questions, share resources and study together across departments.", tone: "brand" },
           { icon: <BarChart3 size={20} />, title: "Polls & Surveys", desc: "Have your say on academic policy and association decisions.", tone: "accent" },
         ]} />
+      </Section>
+
+      <Section id="courses" title="Course catalogue" subtitle={`${CATALOGUE_COURSE_COUNT} undergraduate courses across the School of Natural Sciences — compiled from the departments. Medical-programme students follow dedicated first-year streams.`}>
+        <div className="space-y-8">
+          {COURSE_CATALOGUE.map((yr) => (
+            <div key={yr.year}>
+              <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h3 className="text-lg font-bold text-forest dark:text-brand-300">{yr.year}</h3>
+                <p className="text-sm text-ink-muted">{yr.blurb}</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {yr.disciplines.map((disc) => (
+                  <div key={disc.discipline} className="card p-5">
+                    <div className="mb-3 flex items-center gap-2 font-semibold">
+                      <span className="text-lg">{disc.emoji}</span> {disc.discipline}
+                    </div>
+                    <ul className="space-y-2">
+                      {disc.courses.map((c) => (
+                        <li key={(c.code ?? "") + c.title} className="flex items-start gap-2 text-sm">
+                          {c.code
+                            ? <span className="mt-0.5 shrink-0 rounded-md bg-brand-500/12 px-1.5 py-0.5 font-mono text-xs font-semibold text-brand-600 dark:text-brand-300">{c.code}</span>
+                            : <span className="mt-0.5 shrink-0 rounded-md border border-edge px-1.5 py-0.5 font-mono text-[10px] text-ink-faint">—</span>}
+                          <span className="text-ink-muted">
+                            {c.title}
+                            {c.medical && <span className="ml-1.5 inline-flex items-center gap-0.5 align-middle text-xs text-crimson-600"><Stethoscope size={11} /> medical</span>}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-5 text-xs text-ink-faint">A living list — additions and corrections are welcome via the Academic Affairs Secretary. Courses shown without a code are known by title pending confirmation.</p>
       </Section>
 
       <Section id="research" title="Research Corner" subtitle="Tools and support for undergraduate research.">

@@ -50,10 +50,10 @@ interface SeedSubject {
 
 const SEED: SeedSubject[] = [
   {
-    name: "Biology",
+    name: "Biology · BIO 1400",
     emoji: "🧬",
     color: "emerald",
-    goal: "Ace the cell biology & genetics final",
+    goal: "Master cell biology & genetics for the BIO 1400 exam",
     examInDays: 21,
     decks: [
       {
@@ -61,10 +61,10 @@ const SEED: SeedSubject[] = [
         emoji: "🔬",
         description: "Organelles, membranes and cellular processes",
         cards: [
-          { kind: "basic", front: "What is the powerhouse of the cell?", back: "The mitochondrion — it produces ATP through oxidative phosphorylation." },
+          { kind: "basic", front: "Which organelle produces most of the cell's ATP?", back: "The mitochondrion — through oxidative phosphorylation on the inner membrane." },
           { kind: "basic", front: "What is the function of ribosomes?", back: "Ribosomes synthesise proteins by translating messenger RNA (mRNA)." },
           { kind: "cloze", front: "The {{c1::endoplasmic reticulum}} is rough when studded with ribosomes and smooth when it synthesises lipids.", back: "endoplasmic reticulum" },
-          { kind: "basic", front: "What separates the interior of a cell from its environment?", back: "The plasma (cell) membrane — a phospholipid bilayer with embedded proteins." },
+          { kind: "basic", front: "Name the two features present in plant cells but absent in animal cells.", back: "A cellulose cell wall and chloroplasts (plant cells also have a large central vacuole)." },
           { kind: "mcq", front: "Which organelle contains the cell's genetic material?", back: "The nucleus.", options: ["Golgi apparatus", "Nucleus", "Lysosome", "Vacuole"], answerIndex: 1 },
           { kind: "truefalse", front: "Prokaryotic cells contain a membrane-bound nucleus.", back: "False — prokaryotes lack a membrane-bound nucleus; their DNA sits in the nucleoid region." },
           { kind: "basic", front: "What is the role of the Golgi apparatus?", back: "It modifies, sorts and packages proteins and lipids for secretion or delivery." },
@@ -72,23 +72,24 @@ const SEED: SeedSubject[] = [
         ],
       },
       {
-        name: "Genetics",
+        name: "Genetics & Molecular Biology",
         emoji: "🧫",
         description: "DNA, inheritance and gene expression",
         cards: [
-          { kind: "basic", front: "What are the four bases of DNA?", back: "Adenine (A), Thymine (T), Guanine (G) and Cytosine (C)." },
+          { kind: "basic", front: "What are the four nitrogenous bases of DNA?", back: "Adenine (A), Thymine (T), Guanine (G) and Cytosine (C)." },
           { kind: "basic", front: "State the central dogma of molecular biology.", back: "DNA → RNA → Protein: DNA is transcribed to RNA, which is translated into protein." },
           { kind: "mcq", front: "Which base pairs with Adenine in DNA?", back: "Thymine.", options: ["Guanine", "Cytosine", "Thymine", "Uracil"], answerIndex: 2 },
-          { kind: "cloze", front: "A change in the DNA sequence is called a {{c1::mutation}}.", back: "mutation" },
+          { kind: "cloze", front: "A heritable change in the DNA sequence is called a {{c1::mutation}}.", back: "mutation" },
           { kind: "basic", front: "What is an allele?", back: "One of two or more alternative versions of a gene at a given locus." },
+          { kind: "basic", front: "In a monohybrid cross of two heterozygotes (Aa × Aa), what is the phenotypic ratio?", back: "3 : 1 (dominant : recessive)." },
           { kind: "truefalse", front: "In humans, males are XY and females are XX.", back: "True." },
         ],
       },
     ],
     note: {
       title: "Cell Biology — Key Concepts",
-      tags: ["cells", "exam", "summary"],
-      content: `# Cell Biology — Key Concepts
+      tags: ["BIO 1400", "cells", "exam"],
+      content: `# Cell Biology — Key Concepts (BIO 1400)
 
 ## The Cell
 Cells are the fundamental unit of life. Two broad types:
@@ -105,6 +106,7 @@ Cells are the fundamental unit of life. Two broad types:
 | Ribosome | Protein synthesis |
 | Golgi apparatus | Packaging & shipping |
 | Lysosome | Digestion & recycling |
+| Chloroplast | Photosynthesis (plants only) |
 
 ## Membrane transport
 - **Passive**: diffusion, osmosis, facilitated diffusion (no ATP)
@@ -113,8 +115,7 @@ Cells are the fundamental unit of life. Two broad types:
 > Remember: *mitochondria are the powerhouse — but the ribosome does the building.*
 
 \`\`\`
-ATP = adenosine triphosphate
-Energy currency of the cell
+ATP = adenosine triphosphate — the energy currency of the cell
 \`\`\`
 `,
     },
@@ -123,130 +124,316 @@ Energy currency of the cell
       description: "Quick check on organelles and transport",
       questions: [
         { id: uid("q"), kind: "mcq", prompt: "Which organelle is responsible for ATP synthesis?", options: ["Nucleus", "Mitochondrion", "Ribosome", "Golgi apparatus"], answerIndex: 1, explanation: "Mitochondria generate ATP via oxidative phosphorylation.", topic: "Organelles" },
-        { id: uid("q"), kind: "truefalse", prompt: "Osmosis requires ATP.", options: ["True", "False"], answerIndex: 1, explanation: "Osmosis is passive diffusion of water — no ATP required.", topic: "Transport" },
+        { id: uid("q"), kind: "truefalse", prompt: "Osmosis requires ATP.", options: ["True", "False"], answerIndex: 1, explanation: "Osmosis is the passive diffusion of water — no ATP required.", topic: "Transport" },
         { id: uid("q"), kind: "mcq", prompt: "Where does protein synthesis occur?", options: ["Lysosome", "Ribosome", "Vacuole", "Centriole"], answerIndex: 1, explanation: "Ribosomes translate mRNA into proteins.", topic: "Organelles" },
         { id: uid("q"), kind: "fill", prompt: "The cell membrane is a phospholipid ______.", answerText: "bilayer", explanation: "Two layers of phospholipids form the bilayer.", topic: "Membranes" },
       ],
     },
   },
   {
-    name: "Calculus",
-    emoji: "📐",
-    color: "indigo",
-    goal: "Master derivatives and integrals",
-    examInDays: 35,
+    name: "Chemistry · CHE 1000",
+    emoji: "⚗️",
+    color: "teal",
+    goal: "Build a solid foundation in general & organic chemistry",
+    examInDays: 17,
     decks: [
       {
-        name: "Derivatives",
-        emoji: "📈",
-        description: "Rules of differentiation",
+        name: "Atomic Structure & Bonding",
+        emoji: "⚛️",
+        description: "Atoms, the periodic table and chemical bonds",
         cards: [
-          { kind: "basic", front: "What is the derivative of xⁿ?", back: "n·xⁿ⁻¹ (the power rule)." },
-          { kind: "basic", front: "What is the derivative of sin(x)?", back: "cos(x)." },
-          { kind: "basic", front: "What is the derivative of eˣ?", back: "eˣ — it is its own derivative." },
-          { kind: "cloze", front: "The {{c1::product rule}} states (uv)' = u'v + uv'.", back: "product rule" },
-          { kind: "basic", front: "State the chain rule.", back: "If y = f(g(x)) then dy/dx = f'(g(x)) · g'(x)." },
-          { kind: "mcq", front: "What is the derivative of ln(x)?", back: "1/x.", options: ["x", "1/x", "ln(x)", "eˣ"], answerIndex: 1 },
+          { kind: "basic", front: "What are the three subatomic particles and their charges?", back: "Proton (+1), neutron (0) and electron (−1)." },
+          { kind: "basic", front: "What does the atomic number of an element tell you?", back: "The number of protons in the nucleus — it defines the element." },
+          { kind: "cloze", front: "Atoms of the same element with different numbers of neutrons are called {{c1::isotopes}}.", back: "isotopes" },
+          { kind: "mcq", front: "Which type of bond forms between a metal and a non-metal?", back: "Ionic bond.", options: ["Covalent", "Ionic", "Metallic", "Hydrogen"], answerIndex: 1 },
+          { kind: "basic", front: "How many electrons fill the second (n=2) shell?", back: "Eight — 2 in the 2s subshell and 6 in the 2p subshell." },
+          { kind: "truefalse", front: "A covalent bond involves the transfer of electrons.", back: "False — a covalent bond involves the sharing of electron pairs; transfer gives an ionic bond." },
+          { kind: "cloze", front: "The number of moles equals the mass divided by the {{c1::molar mass}}.", back: "molar mass" },
         ],
       },
       {
-        name: "Integrals",
-        emoji: "∫",
-        description: "Antiderivatives and the fundamental theorem",
+        name: "Organic Foundations",
+        emoji: "🧪",
+        description: "Functional groups, formulae and nomenclature",
         cards: [
-          { kind: "basic", front: "What is ∫ xⁿ dx (n ≠ −1)?", back: "xⁿ⁺¹ / (n+1) + C." },
-          { kind: "basic", front: "What is ∫ 1/x dx?", back: "ln|x| + C." },
-          { kind: "cloze", front: "The {{c1::Fundamental Theorem of Calculus}} links differentiation and integration.", back: "Fundamental Theorem of Calculus" },
-          { kind: "basic", front: "What is ∫ eˣ dx?", back: "eˣ + C." },
+          { kind: "basic", front: "What is the general formula of an alkane?", back: "CₙH₂ₙ₊₂ (e.g. methane CH₄, ethane C₂H₆)." },
+          { kind: "mcq", front: "Which functional group defines an alcohol?", back: "Hydroxyl (–OH).", options: ["Carbonyl (C=O)", "Hydroxyl (–OH)", "Carboxyl (–COOH)", "Amino (–NH₂)"], answerIndex: 1 },
+          { kind: "basic", front: "Give the IUPAC name of CH₃CH₂OH.", back: "Ethanol." },
+          { kind: "cloze", front: "A hydrocarbon with one or more C=C double bonds is an {{c1::alkene}}.", back: "alkene" },
+          { kind: "basic", front: "What functional group is present in ethanoic (acetic) acid?", back: "The carboxyl group, –COOH." },
+          { kind: "truefalse", front: "Structural isomers have the same molecular formula but different arrangements of atoms.", back: "True." },
+          { kind: "basic", front: "Tip: which Science Lab tool draws these structures from a SMILES string?", back: "The Chemistry lab's 2D molecule studio — try CC(=O)O for ethanoic acid." },
+        ],
+      },
+    ],
+    note: {
+      title: "General Chemistry — Exam Essentials",
+      tags: ["CHE 1000", "chemistry", "exam"],
+      content: `# General Chemistry — Exam Essentials (CHE 1000)
+
+## The mole
+$$n = \\frac{m}{M}$$
+
+- **n** = amount (mol) · **m** = mass (g) · **M** = molar mass (g/mol)
+- Avogadro's number: 1 mol = 6.022 × 10²³ particles
+
+## Bonding types
+
+| Bond | Between | Mechanism |
+| --- | --- | --- |
+| Ionic | metal + non-metal | electron transfer |
+| Covalent | non-metal + non-metal | shared electron pairs |
+| Metallic | metal + metal | sea of delocalised electrons |
+
+## Organic functional groups
+- **Alkane** CₙH₂ₙ₊₂ · **Alkene** C=C · **Alkyne** C≡C
+- **Alcohol** –OH · **Aldehyde** –CHO · **Ketone** C=O
+- **Carboxylic acid** –COOH · **Amine** –NH₂
+
+> Practise structures in the **Chemistry Science Lab** — the molecule studio, balancer and titration simulator mirror the CHE 1000 syllabus.
+`,
+    },
+    quiz: {
+      title: "Chemistry Foundations Quiz",
+      description: "Atomic structure, bonding and organic basics",
+      questions: [
+        { id: uid("q"), kind: "mcq", prompt: "How many protons does a carbon atom have?", options: ["4", "6", "12", "14"], answerIndex: 1, explanation: "Carbon's atomic number is 6.", topic: "Atomic structure" },
+        { id: uid("q"), kind: "mcq", prompt: "What is the general formula for an alkane?", options: ["CₙH₂ₙ", "CₙH₂ₙ₊₂", "CₙHₙ", "CₙH₂ₙ₋₂"], answerIndex: 1, explanation: "Saturated hydrocarbons follow CₙH₂ₙ₊₂.", topic: "Organic" },
+        { id: uid("q"), kind: "truefalse", prompt: "An ionic bond forms by sharing electron pairs.", options: ["True", "False"], answerIndex: 1, explanation: "Sharing is covalent; ionic bonding is electron transfer.", topic: "Bonding" },
+        { id: uid("q"), kind: "fill", prompt: "The IUPAC name of CH₃OH is ______.", answerText: "methanol", explanation: "One carbon bearing a hydroxyl group is methanol.", topic: "Nomenclature" },
+      ],
+    },
+  },
+  {
+    name: "Physics · PHY 1010",
+    emoji: "🔭",
+    color: "sky",
+    goal: "Understand mechanics, energy and waves",
+    examInDays: 24,
+    decks: [
+      {
+        name: "Mechanics & Kinematics",
+        emoji: "🚀",
+        description: "Motion, forces and Newton's laws",
+        cards: [
+          { kind: "basic", front: "State Newton's second law of motion.", back: "The net force on a body equals its mass times acceleration: F = ma." },
+          { kind: "basic", front: "What is the SI unit of force, and what is it in base units?", back: "The newton (N) = kg·m·s⁻²." },
+          { kind: "cloze", front: "For an object in free fall near Earth, the acceleration g ≈ {{c1::9.81}} m/s².", back: "9.81" },
+          { kind: "mcq", front: "Which quantity is a vector?", back: "Velocity.", options: ["Speed", "Mass", "Velocity", "Temperature"], answerIndex: 2 },
+          { kind: "basic", front: "Write the SUVAT equation linking v, u, a and s (no time).", back: "v² = u² + 2as." },
+          { kind: "truefalse", front: "Newton's first law says an object at rest stays at rest unless acted on by a net force.", back: "True — this is the law of inertia." },
+          { kind: "basic", front: "Define kinetic energy and give its formula.", back: "Energy of motion: KE = ½mv²." },
+        ],
+      },
+      {
+        name: "Energy, Waves & Electricity",
+        emoji: "⚡",
+        description: "Work, power, waves and Ohm's law",
+        cards: [
+          { kind: "basic", front: "State the principle of conservation of energy.", back: "Energy cannot be created or destroyed, only transformed from one form to another." },
+          { kind: "cloze", front: "Power is the rate of doing work: P = W / {{c1::t}}.", back: "t" },
+          { kind: "mcq", front: "Ohm's law relates voltage, current and resistance as:", back: "V = IR.", options: ["V = I/R", "V = IR", "V = R/I", "I = VR"], answerIndex: 1 },
+          { kind: "basic", front: "What is the relationship between wave speed, frequency and wavelength?", back: "v = fλ (speed = frequency × wavelength)." },
+          { kind: "basic", front: "What is the SI unit of power?", back: "The watt (W) = joule per second (J/s)." },
+          { kind: "truefalse", front: "In a transverse wave, the oscillation is parallel to the direction of energy travel.", back: "False — in a transverse wave the oscillation is perpendicular; parallel oscillation is a longitudinal wave." },
+        ],
+      },
+    ],
+    note: {
+      title: "Mechanics — Formula Sheet",
+      tags: ["PHY 1010", "mechanics", "exam"],
+      content: `# Mechanics — Formula Sheet (PHY 1010)
+
+## Kinematics (SUVAT)
+Constant acceleration:
+
+- $v = u + at$
+- $s = ut + \\tfrac{1}{2}at^2$
+- $v^2 = u^2 + 2as$
+
+## Dynamics
+- Newton's 2nd law: $F = ma$
+- Weight: $W = mg$, with $g \\approx 9.81\\ \\text{m/s}^2$
+
+## Energy & power
+
+| Quantity | Formula | Unit |
+| --- | --- | --- |
+| Kinetic energy | $\\tfrac{1}{2}mv^2$ | J |
+| Gravitational PE | $mgh$ | J |
+| Work | $Fd$ | J |
+| Power | $W/t$ | W |
+
+## Waves & electricity
+- Wave equation: $v = f\\lambda$
+- Ohm's law: $V = IR$
+
+> Check your working in the **Physics Science Lab** — the projectile simulator and SUVAT solver use exactly these relations.
+`,
+    },
+    quiz: {
+      title: "Mechanics Warm-up",
+      description: "Newton's laws, kinematics and energy",
+      questions: [
+        { id: uid("q"), kind: "mcq", prompt: "A 2 kg object accelerates at 3 m/s². What net force acts on it?", options: ["1.5 N", "5 N", "6 N", "9 N"], answerIndex: 2, explanation: "F = ma = 2 × 3 = 6 N.", topic: "Dynamics" },
+        { id: uid("q"), kind: "truefalse", prompt: "Velocity is a scalar quantity.", options: ["True", "False"], answerIndex: 1, explanation: "Velocity has direction, so it is a vector.", topic: "Kinematics" },
+        { id: uid("q"), kind: "mcq", prompt: "Which equation is Ohm's law?", options: ["V = I/R", "V = IR", "P = IV", "F = ma"], answerIndex: 1, explanation: "Ohm's law is V = IR.", topic: "Electricity" },
+        { id: uid("q"), kind: "fill", prompt: "The SI unit of energy is the ______.", answerText: "joule", explanation: "Energy and work are measured in joules (J).", topic: "Energy" },
+      ],
+    },
+  },
+  {
+    name: "Mathematics · MAT 1100",
+    emoji: "📐",
+    color: "indigo",
+    goal: "Sharpen algebra, functions and introductory calculus",
+    examInDays: 14,
+    decks: [
+      {
+        name: "Algebra & Functions",
+        emoji: "🔢",
+        description: "Quadratics, indices and logarithms",
+        cards: [
+          { kind: "basic", front: "State the quadratic formula for ax² + bx + c = 0.", back: "x = (−b ± √(b² − 4ac)) / (2a)." },
+          { kind: "cloze", front: "The discriminant is {{c1::b² − 4ac}}; if it is negative there are no real roots.", back: "b² − 4ac" },
+          { kind: "basic", front: "Simplify: log(a) + log(b).", back: "log(ab) — the product rule for logarithms." },
+          { kind: "mcq", front: "What is x⁰ for any x ≠ 0?", back: "1.", options: ["0", "1", "x", "undefined"], answerIndex: 1 },
+          { kind: "basic", front: "Expand (a + b)².", back: "a² + 2ab + b²." },
+          { kind: "truefalse", front: "√(a + b) = √a + √b for all positive a, b.", back: "False — square roots do not distribute over addition." },
+        ],
+      },
+      {
+        name: "Differentiation",
+        emoji: "📈",
+        description: "Derivatives and rules of differentiation",
+        cards: [
+          { kind: "basic", front: "What is the derivative of xⁿ?", back: "n·xⁿ⁻¹ (the power rule)." },
+          { kind: "cloze", front: "The derivative of sin(x) is {{c1::cos(x)}}.", back: "cos(x)" },
+          { kind: "basic", front: "State the product rule for (uv)′.", back: "u′v + uv′." },
+          { kind: "mcq", front: "What is d/dx of eˣ?", back: "eˣ.", options: ["x·eˣ⁻¹", "eˣ", "1", "ln x"], answerIndex: 1 },
+          { kind: "basic", front: "What does the derivative represent geometrically?", back: "The gradient (slope) of the tangent to the curve at a point." },
+          { kind: "cloze", front: "The derivative of ln(x) is {{c1::1/x}}.", back: "1/x" },
         ],
       },
     ],
     note: {
       title: "Differentiation Rules Cheat Sheet",
-      tags: ["derivatives", "formulas"],
-      content: `# Differentiation Cheat Sheet
+      tags: ["MAT 1100", "calculus", "exam"],
+      content: `# Differentiation Rules (MAT 1100)
 
-## Core rules
-- **Power rule:** $\\frac{d}{dx} x^n = n x^{n-1}$
-- **Product rule:** $(uv)' = u'v + uv'$
-- **Quotient rule:** $(u/v)' = \\frac{u'v - uv'}{v^2}$
-- **Chain rule:** $\\frac{d}{dx} f(g(x)) = f'(g(x)) g'(x)$
+## Standard derivatives
 
-## Common derivatives
-- $\\frac{d}{dx}\\sin x = \\cos x$
-- $\\frac{d}{dx}\\cos x = -\\sin x$
-- $\\frac{d}{dx} e^x = e^x$
-- $\\frac{d}{dx}\\ln x = \\frac{1}{x}$
+| f(x) | f′(x) |
+| --- | --- |
+| xⁿ | n·xⁿ⁻¹ |
+| sin x | cos x |
+| cos x | −sin x |
+| eˣ | eˣ |
+| ln x | 1/x |
 
-**Tip:** always simplify *before* differentiating — it saves algebra later.
+## Combination rules
+- **Sum**: (u + v)′ = u′ + v′
+- **Product**: (uv)′ = u′v + uv′
+- **Quotient**: (u/v)′ = (u′v − uv′) / v²
+- **Chain**: (f(g(x)))′ = f′(g(x))·g′(x)
+
+## Worked example
+$$\\frac{d}{dx}(3x^2 + 2x) = 6x + 2$$
+
+> Plot any function and its behaviour in the **Mathematics Science Lab** graphing calculator.
 `,
     },
     quiz: {
       title: "Derivatives Warm-up",
-      description: "Test your differentiation rules",
+      description: "Differentiation rules and standard results",
       questions: [
-        { id: uid("q"), kind: "mcq", prompt: "d/dx of x³ = ?", options: ["3x²", "x²", "3x", "x⁴/4"], answerIndex: 0, explanation: "Power rule: 3x^(3-1) = 3x².", topic: "Power rule" },
-        { id: uid("q"), kind: "mcq", prompt: "d/dx of cos(x) = ?", options: ["sin(x)", "−sin(x)", "cos(x)", "−cos(x)"], answerIndex: 1, explanation: "The derivative of cosine is negative sine.", topic: "Trig" },
-        { id: uid("q"), kind: "fill", prompt: "∫ eˣ dx = ______ + C", answerText: "eˣ", explanation: "e^x is its own antiderivative.", topic: "Integrals" },
+        { id: uid("q"), kind: "mcq", prompt: "What is the derivative of x³?", options: ["3x²", "x²", "3x", "x⁴/4"], answerIndex: 0, explanation: "Power rule: d/dx xⁿ = n·xⁿ⁻¹.", topic: "Power rule" },
+        { id: uid("q"), kind: "mcq", prompt: "d/dx of cos(x) is:", options: ["sin(x)", "−sin(x)", "−cos(x)", "tan(x)"], answerIndex: 1, explanation: "The derivative of cosine is −sine.", topic: "Trig derivatives" },
+        { id: uid("q"), kind: "truefalse", prompt: "The derivative gives the slope of the tangent line.", options: ["True", "False"], answerIndex: 0, explanation: "That is the geometric meaning of the derivative.", topic: "Concept" },
+        { id: uid("q"), kind: "fill", prompt: "The derivative of eˣ is ______.", answerText: "e^x", explanation: "eˣ is its own derivative.", topic: "Exponentials" },
       ],
     },
   },
   {
-    name: "World History",
-    emoji: "🌍",
-    color: "amber",
-    goal: "Understand the 20th century",
-    examInDays: 14,
+    name: "Computing · CSC 1000",
+    emoji: "💻",
+    color: "violet",
+    goal: "Grasp core programming and computing concepts",
+    examInDays: 28,
     decks: [
       {
-        name: "20th Century",
-        emoji: "🏛️",
-        description: "World wars and the modern era",
+        name: "Programming Fundamentals",
+        emoji: "⌨️",
+        description: "Variables, control flow and data types",
         cards: [
-          { kind: "basic", front: "When did World War I begin?", back: "1914 (it ended in 1918)." },
-          { kind: "basic", front: "What event triggered World War I?", back: "The assassination of Archduke Franz Ferdinand of Austria in Sarajevo, June 1914." },
-          { kind: "mcq", front: "In which year did World War II end?", back: "1945.", options: ["1918", "1939", "1945", "1950"], answerIndex: 2 },
-          { kind: "cloze", front: "The {{c1::Cold War}} was a period of geopolitical tension between the US and the USSR.", back: "Cold War" },
-          { kind: "truefalse", front: "The Berlin Wall fell in 1989.", back: "True." },
-          { kind: "basic", front: "What was the Marshall Plan?", back: "A US programme (1948) providing aid to rebuild Western European economies after WWII." },
+          { kind: "basic", front: "What is a variable in programming?", back: "A named location in memory that stores a value which can change during execution." },
+          { kind: "mcq", front: "Which of these is a Boolean value?", back: "true.", options: ["42", "\"hello\"", "true", "3.14"], answerIndex: 2 },
+          { kind: "cloze", front: "A {{c1::loop}} repeats a block of code while a condition holds.", back: "loop" },
+          { kind: "basic", front: "What is the difference between a compiler and an interpreter?", back: "A compiler translates the whole program to machine code before running; an interpreter executes it line by line at runtime." },
+          { kind: "truefalse", front: "An array stores multiple values under a single variable name.", back: "True — elements are accessed by index." },
+          { kind: "basic", front: "What does a function return?", back: "A value (or none) produced by its body, handed back to the caller." },
+        ],
+      },
+      {
+        name: "Data & Algorithms",
+        emoji: "🧮",
+        description: "Number systems, complexity and structures",
+        cards: [
+          { kind: "basic", front: "Convert the binary number 1011 to decimal.", back: "11 — that is 8 + 0 + 2 + 1." },
+          { kind: "mcq", front: "What is the time complexity of binary search?", back: "O(log n).", options: ["O(n)", "O(log n)", "O(n²)", "O(1)"], answerIndex: 1 },
+          { kind: "cloze", front: "A {{c1::stack}} is a last-in, first-out (LIFO) data structure.", back: "stack" },
+          { kind: "basic", front: "How many bits are in one byte?", back: "Eight bits." },
+          { kind: "truefalse", front: "An algorithm is a finite sequence of well-defined steps to solve a problem.", back: "True." },
+          { kind: "basic", front: "Tip: which Science Lab lets you run JavaScript and watch sorting algorithms?", back: "The Computer Science lab — the sandboxed playground and the sorting/binary-search visualizers." },
         ],
       },
     ],
     note: {
-      title: "Timeline — The 20th Century",
-      tags: ["timeline", "wars"],
-      content: `# 20th Century Timeline
+      title: "Computing Foundations — Quick Reference",
+      tags: ["CSC 1000", "programming", "exam"],
+      content: `# Computing Foundations (CSC 1000)
 
-- **1914–1918** — World War I
-- **1929** — The Great Depression begins
-- **1939–1945** — World War II
-- **1945** — United Nations founded
-- **1947–1991** — The Cold War
-- **1969** — First Moon landing
-- **1989** — Fall of the Berlin Wall
-- **1991** — Dissolution of the Soviet Union
+## Building blocks
+- **Variable** — a named, changeable store of data
+- **Data types** — integer, float, string, boolean
+- **Control flow** — sequence, selection (if/else), iteration (loops)
+- **Function** — a reusable block that may take inputs and return a value
 
-## Causes of WWI (M.A.I.N.)
-1. **M**ilitarism
-2. **A**lliances
-3. **I**mperialism
-4. **N**ationalism
+## Number systems
+
+| Decimal | Binary | Hex |
+| --- | --- | --- |
+| 10 | 1010 | A |
+| 15 | 1111 | F |
+| 255 | 11111111 | FF |
+
+## Big-O — how algorithms scale
+
+| Complexity | Example |
+| --- | --- |
+| O(1) | array index lookup |
+| O(log n) | binary search |
+| O(n) | linear scan |
+| O(n²) | bubble sort |
+
+> Run and visualise these in the **Computer Science Science Lab** — the JS playground and sorting/binary-search animations.
 `,
     },
     quiz: {
-      title: "20th Century Quick Quiz",
-      description: "Key dates and events",
+      title: "Computing Basics Quiz",
+      description: "Programming, number systems and complexity",
       questions: [
-        { id: uid("q"), kind: "mcq", prompt: "When did WWII end?", options: ["1918", "1945", "1963", "1989"], answerIndex: 1, explanation: "World War II ended in 1945.", topic: "WWII" },
-        { id: uid("q"), kind: "truefalse", prompt: "The Cold War was fought primarily between the US and the USSR.", options: ["True", "False"], answerIndex: 0, explanation: "It was the standoff between the two post-war superpowers.", topic: "Cold War" },
-        { id: uid("q"), kind: "fill", prompt: "The Berlin Wall fell in the year ______.", answerText: "1989", explanation: "The wall fell on 9 November 1989.", topic: "Cold War" },
+        { id: uid("q"), kind: "mcq", prompt: "What is the binary number 101 in decimal?", options: ["3", "5", "6", "9"], answerIndex: 1, explanation: "101₂ = 4 + 0 + 1 = 5.", topic: "Number systems" },
+        { id: uid("q"), kind: "mcq", prompt: "Binary search on a sorted array has complexity:", options: ["O(n)", "O(log n)", "O(n²)", "O(1)"], answerIndex: 1, explanation: "Each step halves the search space.", topic: "Complexity" },
+        { id: uid("q"), kind: "truefalse", prompt: "A stack is a first-in, first-out structure.", options: ["True", "False"], answerIndex: 1, explanation: "A stack is LIFO; a queue is FIFO.", topic: "Data structures" },
+        { id: uid("q"), kind: "fill", prompt: "One byte contains ______ bits.", answerText: "8", explanation: "A byte is 8 bits.", topic: "Fundamentals" },
       ],
     },
   },
 ];
 
 /** Build a full seeded AppState for a new user. */
-export function buildSeedState(name = "Alex Rivera", email = "you@cognify.app"): AppState {
+export function buildSeedState(name = "Natural Sciences Student", email = "you@unza.zm"): AppState {
   const now = Date.now();
   const subjects: Subject[] = [];
   const decks: Deck[] = [];
