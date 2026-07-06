@@ -202,6 +202,22 @@ export interface Gamification {
   unlocked: Record<string, number>;
 }
 
+// ─── Academic hub catalogue (admin-managed) ──────────────────────────────────
+
+export interface CatalogueCourse {
+  id: ID;
+  code?: string;
+  title: string;
+  dept: string;
+}
+
+export interface CatalogueProgramme {
+  id: ID;
+  name: string;
+  emoji: string;
+  courses: CatalogueCourse[];
+}
+
 // ─── Root state ──────────────────────────────────────────────────────────────
 
 export interface AppState {
@@ -218,4 +234,6 @@ export interface AppState {
   planner: PlannerTask[];
   threads: TutorThread[];
   activity: DayActivity[];
+  /** Admin-managed programme catalogue for the public academics page. */
+  catalogue?: { programmes: CatalogueProgramme[] };
 }

@@ -16,6 +16,8 @@
 // without a code. This is a living list — corrections are welcome via the
 // Academic Affairs Secretary.
 
+import type { AppState, CatalogueProgramme } from "./types";
+
 export const SCHOOL = {
   name: "School of Natural Sciences",
   university: "The University of Zambia",
@@ -107,3 +109,25 @@ export const PROGRAMMES: Programme[] = [
 ];
 
 export const FOUNDATION_COURSE_COUNT = FIRST_YEAR.length;
+
+// ─── Editable catalogue (admin-managed, stored in AppState) ───────────────────
+
+/** The seed programmes as an editable catalogue (stable, deterministic ids). */
+export function defaultProgrammes(): CatalogueProgramme[] {
+  return PROGRAMMES.map((p, i) => ({
+    id: `prog_${i}`,
+    name: p.name,
+    emoji: p.emoji,
+    courses: (p.secondYear ?? []).map((c, j) => ({
+      id: `prog_${i}_c_${j}`, code: c.code, title: c.title, dept: c.dept,
+    })),
+  }));
+}
+
+/** Programmes to display: the admin-managed list, or the defaults. */
+export function programmesOf(state: AppState): CatalogueProgramme[] {
+  return state.catalogue?.programmes ?? defaultProgrammes();
+}
+
+/** Department names offered in the editor's course picker. */
+export const DEPARTMENT_NAMES = DEPARTMENTS.map((d) => d.name);

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { PageHero, Section, FeatureGrid } from "@/components/public/sections";
 import { GraduationCap, BookOpen, Newspaper, MessagesSquare, BarChart3, FlaskConical, ArrowRight, Stethoscope } from "lucide-react";
-import { FIRST_YEAR, DEPARTMENTS, PROGRAMMES } from "@/lib/courses-catalogue";
+import { FIRST_YEAR, DEPARTMENTS } from "@/lib/courses-catalogue";
+import { ProgrammesSection } from "@/components/public/programmes-section";
 
 function CourseCode({ code }: { code?: string }) {
   return code
@@ -73,35 +74,8 @@ export default function Academics() {
           </div>
         </div>
 
-        {/* Programmes */}
-        <div>
-          <h3 className="mb-1 text-lg font-bold text-forest dark:text-brand-300">Programmes</h3>
-          <p className="mb-4 max-w-3xl text-sm text-ink-muted">From second year a student follows their programme, registering for the courses its contributing departments require.</p>
-          <div className="grid gap-4 lg:grid-cols-2">
-            {PROGRAMMES.map((p) => (
-              <div key={p.name} className={`card p-5 ${p.secondYear ? "lg:col-span-2" : ""}`}>
-                <div className="flex items-center gap-2 font-semibold"><span className="text-lg">{p.emoji}</span> {p.name}
-                  {!p.secondYear && <span className="ml-auto text-xs text-ink-faint">course list being compiled</span>}
-                </div>
-                {p.secondYear && (
-                  <>
-                    <div className="mt-1 text-xs font-medium uppercase tracking-wide text-ink-faint">Second-year courses</div>
-                    <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                      {p.secondYear.map((c) => (
-                        <div key={c.title} className="flex items-start gap-2 text-sm">
-                          <CourseCode code={c.code} />
-                          <span className="text-ink-muted">{c.title} <span className="text-ink-faint">· {c.dept}</span></span>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <p className="mt-6 text-xs text-ink-faint">A living list — additions and corrections are welcome via the Academic Affairs Secretary. Courses shown without a code (—) are known by title pending confirmation.</p>
+        {/* Programmes (admin-managed, read from the store) */}
+        <ProgrammesSection />
       </Section>
 
       <Section id="research" title="Research Corner" subtitle="Tools and support for undergraduate research.">

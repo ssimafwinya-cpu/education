@@ -11,6 +11,7 @@ import { useStore } from "@/lib/store";
 import { PageHeader } from "@/components/page-header";
 import { Card, Badge, Segmented, EmptyState, useToast } from "@/components/ui";
 import { AreaChart, BarChart, Donut } from "@/components/charts";
+import { AcademicHubEditor } from "@/components/admin/academic-hub-editor";
 import { cn } from "@/lib/utils";
 
 // The admin panel is role-gated (profile.role === "admin"). Metrics use
@@ -45,7 +46,7 @@ const AUDIT = [
 export default function AdminPage() {
   const { state, dispatch } = useStore();
   const toast = useToast();
-  const [tab, setTab] = useState<"overview" | "users" | "moderation" | "audit">("overview");
+  const [tab, setTab] = useState<"overview" | "users" | "academic" | "moderation" | "audit">("overview");
   const [query, setQuery] = useState("");
   const [suspended, setSuspended] = useState<Set<string>>(new Set(["sam@school.org"]));
   const [resolved, setResolved] = useState<Set<string>>(new Set());
@@ -83,6 +84,7 @@ export default function AdminPage() {
         <Segmented value={tab} onChange={setTab} options={[
           { value: "overview", label: "Overview" },
           { value: "users", label: "Users" },
+          { value: "academic", label: "Academic Hub" },
           { value: "moderation", label: <span className="flex items-center gap-1">Moderation {FLAGGED.length - resolved.size > 0 && <span className="chip bg-rose-500/15 text-rose-500">{FLAGGED.length - resolved.size}</span>}</span> },
           { value: "audit", label: "Audit log" },
         ]} />
@@ -137,6 +139,14 @@ export default function AdminPage() {
             <BarChart data={revenue} color="#f59e0b" labels={["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"]} />
           </Card>
         </div>
+      )}
+
+      {tab === "academic" && (
+        <Card>
+          <h3 className="mb-1 flex items-center gap-2 font-semibold"><GraduationCap size={16} className="text-brand-500" /> Academic Hub — course catalogue</h3>
+          <p className="mb-4 text-sm text-ink-muted">Manage the School of Natural Sciences programmes and their second-year courses. Changes appear on the public Academics page.</p>
+          <AcademicHubEditor />
+        </Card>
       )}
 
       {tab === "users" && (

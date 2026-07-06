@@ -61,7 +61,9 @@ type Action =
   | { type: "DELETE_THREAD"; id: string }
   // gamification
   | { type: "AWARD"; xp?: number; coins?: number }
-  | { type: "LOG_ACTIVITY"; patch: Partial<import("./types").DayActivity> };
+  | { type: "LOG_ACTIVITY"; patch: Partial<import("./types").DayActivity> }
+  // catalogue (admin-managed academic hub)
+  | { type: "SET_PROGRAMMES"; programmes: import("./types").CatalogueProgramme[] };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -322,6 +324,10 @@ function reducer(state: AppState, action: Action): AppState {
       return award(state, action.xp ?? 0, action.coins ?? 0);
     case "LOG_ACTIVITY":
       return withActivity(state, action.patch);
+
+    // catalogue (admin-managed academic hub)
+    case "SET_PROGRAMMES":
+      return { ...state, catalogue: { programmes: action.programmes } };
 
     default:
       return state;

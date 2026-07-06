@@ -62,6 +62,12 @@ Public site (association):
                            second-year courses detailed by contributing
                            department. The hub's starter content (lib/seed.ts)
                            seeds exactly the four common first-year courses.
+                           The programmes list is admin-editable: the Admin
+                           console's "Academic Hub" tab manages programmes and
+                           their courses (SET_PROGRAMMES → state.catalogue),
+                           and the public Academics page reads that store slice
+                           live, so admins fill in each programme's courses
+                           without a code change.
 
 Academic Hub (native module, one account):
   /hub                     dashboard

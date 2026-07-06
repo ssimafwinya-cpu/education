@@ -7,6 +7,7 @@ import type {
 } from "./types";
 import { addDays, isoDate, uid } from "./utils";
 import { emptyDay } from "./gamification";
+import { defaultProgrammes } from "./courses-catalogue";
 
 export const DEFAULT_SETTINGS: UserSettings = {
   theme: "system",
@@ -511,5 +512,6 @@ export function buildSeedState(name = "Natural Sciences Student", email = "you@u
       },
     ],
     activity,
+    catalogue: { programmes: defaultProgrammes() },
   };
 }
