@@ -28,7 +28,7 @@ const NAV: NavItem[] = [
     drop: [
       { label: "Our History", href: "/about" },
       { label: "Executive Committee", href: "/about#executive" },
-      { label: "Constitution", href: "/about#constitution" },
+      { label: "Constitution", href: "/constitution" },
       { label: "Partners & Sponsors", href: "/about#partners" },
     ],
   },

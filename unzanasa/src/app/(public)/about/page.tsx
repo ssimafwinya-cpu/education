@@ -1,12 +1,19 @@
+import Link from "next/link";
 import { PageHero, Section, StatBand } from "@/components/public/sections";
 
+// The nine offices established by Article 8 of the UNZANASA Constitution,
+// with duties summarised from Articles 14–17. Officers are elected each
+// academic year (Articles 12–13).
 const EXEC = [
-  { role: "President", name: "Chanda Mulenga", dept: "Physics" },
-  { role: "Vice President", name: "Natasha Phiri", dept: "Biological Sciences" },
-  { role: "Secretary General", name: "Joseph Banda", dept: "Chemistry" },
-  { role: "Treasurer", name: "Mary Tembo", dept: "Mathematics" },
-  { role: "Academic Secretary", name: "David Zulu", dept: "Computer Science" },
-  { role: "Welfare Secretary", name: "Grace Sakala", dept: "Geology" },
+  { role: "President", duty: "Presides over meetings, coordinates all Association activities, spokesperson and external affairs officer, account signatory." },
+  { role: "Vice-President", duty: "Deputises the President, chairs the Disciplinary Committee, succeeds automatically if the presidency falls vacant." },
+  { role: "Secretary General", duty: "Keeps minutes, handles all correspondence and registration matters, account signatory." },
+  { role: "Treasurer", duty: "Keeps the books, chairs the Financial Committee, presents the audited annual financial report." },
+  { role: "Project Co-ordinator", duty: "Oversees project proposals from ad-hoc committees and manages Association projects." },
+  { role: "Academic Affairs Secretary", duty: "Responds to students' academic plight and represents students academically at the School." },
+  { role: "Sports & Recreation Secretary", duty: "Oversees all sports and recreation activities of the Association." },
+  { role: "Publicity & Information Secretary", duty: "Publicises meetings and resolutions; runs the Association's email and social media." },
+  { role: "Committee Members (×2)", duty: "Perform duties as delegated by the Executive Committee." },
 ];
 
 export default function About() {
@@ -30,31 +37,39 @@ export default function About() {
         ]} />
       </Section>
 
-      <Section id="executive" title="Executive Committee" subtitle="The elected student leaders serving UNZANASA this academic year.">
+      <Section id="executive" title="Executive Committee" subtitle="The nine offices established by Article 8 of the Constitution — elected by members each academic year, two weeks after the UNZASU elections.">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {EXEC.map((m) => (
-            <div key={m.role} className="card flex items-center gap-4 p-5">
-              <div className="grid h-12 w-12 place-items-center rounded-full bg-brand-500/12 text-lg font-bold text-brand-600 dark:text-brand-300">
-                {m.name.split(" ").map((n) => n[0]).join("")}
-              </div>
-              <div>
-                <div className="font-semibold">{m.name}</div>
-                <div className="text-xs text-ink-muted">{m.role} · {m.dept}</div>
-              </div>
+            <div key={m.role} className="card p-5">
+              <div className="font-semibold text-brand-600 dark:text-brand-300">{m.role}</div>
+              <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">{m.duty}</p>
             </div>
           ))}
         </div>
+        <p className="mt-4 text-sm text-ink-muted">
+          Eligibility, tenure and election rules are set out in Articles 9–13 of the{" "}
+          <Link href="/constitution" className="font-medium text-brand-600 hover:underline dark:text-brand-300">Constitution</Link>.
+        </p>
       </Section>
 
-      <Section id="constitution" title="Constitution & governance" subtitle="UNZANASA is governed by a student-ratified constitution.">
-        <div className="grid gap-4 sm:grid-cols-3">
+      <Section id="constitution" title="Constitution & governance" subtitle="UNZANASA is governed by its Constitution — the supreme law of the Association, approved by the Dean of the School of Natural Sciences.">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            ["Mission", "To champion academic excellence and student welfare across the Natural Sciences."],
-            ["Vision", "To be Africa's leading science student association and digital academic ecosystem."],
-            ["Values", "Integrity, scholarship, inclusivity, service and innovation."],
+            ["Four organs", "The Executive Committee, the General Assembly, the Electoral Commission and the Disciplinary Committee (Article 4)."],
+            ["Membership", "Full membership for all School of Natural Sciences students; alumni and faculty are members too (Article 3)."],
+            ["Accountability", "Audited annual finances, an independent 12-member Electoral Commission, and impeachment by 30% of the General Assembly."],
+            ["Rule of law", "Subject to the UNZASU Constitution, the Constitution of Zambia and the Higher Education Act (Article 1)."],
           ].map(([t, d]) => (
             <div key={t} className="card p-6"><h3 className="font-semibold text-brand-600 dark:text-brand-300">{t}</h3><p className="mt-2 text-sm text-ink-muted">{d}</p></div>
           ))}
+        </div>
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <Link href="/constitution" className="inline-flex items-center gap-2 rounded-lg bg-forest px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110">
+            Read the full Constitution
+          </Link>
+          <a href="/documents/UNZANASA-Constitution.pdf" download className="text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">
+            Download the official PDF
+          </a>
         </div>
       </Section>
 

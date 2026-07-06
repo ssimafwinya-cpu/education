@@ -45,6 +45,11 @@ m/s, quadratic x²−3x+2 → roots 1,2, and so on.
 ```
 Public site (association):
   /  /about  /academics  /events  /sports  /welfare  /alumni  /contact  /portal
+  /constitution            the full UNZANASA Constitution (structured from the
+                           official PDF, which ships at
+                           /documents/UNZANASA-Constitution.pdf); the About
+                           page's Executive Committee & governance sections are
+                           derived from Articles 3–18
 
 Academic Hub (native module, one account):
   /hub                     dashboard
