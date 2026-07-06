@@ -12,7 +12,7 @@ Academic Hub is preserved unchanged at the repository root.
 | **Two sites** | UNZANASA (static HTML SPA) + Academic Hub (Next.js) | One Next.js app |
 | **Public site** | `data-page` client SPA | `src/app/(public)/*` route group with the `PublicShell` (navy-green navbar, dropdowns, day/night toggle, footer) |
 | **Academic Hub** | separate app at `/app` | native module at `/hub` (all internal links rewritten) |
-| **Auth** | none / separate | one account across public site + hub (`lib/account.tsx`, `/api/auth/*`) |
+| **Auth** | none / separate | one account across public site + hub (`lib/account.tsx`, `/api/auth/*`) — bcrypt + JWT cookies, plus **password reset and email verification** (single-use hashed tokens, 30 min/24 h expiry; Resend when `RESEND_API_KEY` is set, a `.data/outbox/` file transport with dev links otherwise; `/forgot-password`, `/reset-password`, `/verify-email`, resend banner in the hub) |
 | **Theme** | UNZANASA palette | shared design tokens re-themed to the UNZANASA palette (forest green, teal, gold, crimson) — every Hub component adapts automatically |
 | **Branding** | "Cognify" | "UNZANASA Academic Hub" throughout; UNZA + UNZANASA logos in `lib/brand-logos.ts` |
 

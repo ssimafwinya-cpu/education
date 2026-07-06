@@ -73,7 +73,10 @@ export async function sessionUser(req: NextRequest): Promise<StoredUser | null> 
 
 /** Public projection of a user (never includes the password hash). */
 export function publicUser(u: StoredUser) {
-  return { id: u.id, email: u.email, name: u.name, avatar: u.avatar, role: u.role };
+  return {
+    id: u.id, email: u.email, name: u.name, avatar: u.avatar, role: u.role,
+    emailVerified: Boolean(u.emailVerified),
+  };
 }
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;

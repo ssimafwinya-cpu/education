@@ -5,6 +5,8 @@ import {
 } from "@/server/auth";
 import { getStore } from "@/server/storage";
 import { rateLimit, clientIp } from "@/server/ratelimit";
+import { generateToken, verifyIdentifier, VERIFY_TTL_MS } from "@/server/tokens";
+import { sendMail, verifyEmailMail, appUrl } from "@/server/mailer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,6 +43,16 @@ export async function POST(req: NextRequest) {
       passwordHash: await hashPassword(password),
       role: "STUDENT",
     });
+    // Send the verification email; registration must not fail if mail can't.
+    try {
+      const { raw, hash } = generateToken();
+      await store.saveToken(verifyIdentifier(email), hash, Date.now() + VERIFY_TTL_MS);
+      const link = `${appUrl()}/verify-email?token=${raw}&email=${encodeURIComponent(email)}`;
+      await sendMail(verifyEmailMail(email, link));
+    } catch (mailErr) {
+      console.warn("verification mail failed:", mailErr);
+    }
+
     const res = NextResponse.json({ user: publicUser(user) }, { status: 201 });
     attachSessionCookie(res, await createSessionToken(user.id));
     return res;

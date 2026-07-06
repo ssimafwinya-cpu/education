@@ -122,7 +122,7 @@ export default function Login() {
             </label>
             <label className="block">
               <span className="mb-1 flex items-center justify-between text-xs font-medium text-ink-muted">
-                Password {mode === "signin" && <a href="#" className="text-brand-500 hover:underline">Forgot?</a>}
+                Password {mode === "signin" && <Link href="/forgot-password" className="text-brand-500 hover:underline">Forgot?</Link>}
               </span>
               <div className="relative">
                 <Lock size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />

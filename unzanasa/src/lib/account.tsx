@@ -18,6 +18,7 @@ export interface AccountUser {
   name: string;
   avatar: string;
   role: string;
+  emailVerified?: boolean;
 }
 
 export type SyncStatus = "guest" | "syncing" | "synced" | "offline" | "error";
@@ -29,6 +30,8 @@ interface AccountCtx {
   login(email: string, password: string): Promise<{ ok: boolean; error?: string }>;
   logout(): Promise<void>;
   syncNow(): Promise<void>;
+  /** Re-fetch the session user (e.g. after email verification). */
+  refreshUser(): Promise<void>;
 }
 
 const Ctx = createContext<AccountCtx | null>(null);
@@ -183,8 +186,13 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
 
   const syncNow = useCallback(async () => { await push(); }, [push]);
 
+  const refreshUser = useCallback(async () => {
+    const { status: code, body } = await api<{ user: AccountUser | null }>("/api/auth/me");
+    if (code === 200 && body.user) setUser(body.user);
+  }, []);
+
   return (
-    <Ctx.Provider value={{ user, status, register, login, logout, syncNow }}>
+    <Ctx.Provider value={{ user, status, register, login, logout, syncNow, refreshUser }}>
       {children}
     </Ctx.Provider>
   );

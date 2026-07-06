@@ -21,6 +21,7 @@ import { ProgressRing } from "@/components/ui";
 import { useToast } from "@/components/ui";
 import { ACHIEVEMENTS } from "@/lib/store";
 import { Onboarding } from "@/components/onboarding";
+import { VerifyEmailBanner } from "@/components/verify-email-banner";
 
 interface NavItem {
   href: string;
@@ -265,6 +266,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
         </header>
+
+        <VerifyEmailBanner />
 
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">
           {ready ? children : <ShellSkeleton />}

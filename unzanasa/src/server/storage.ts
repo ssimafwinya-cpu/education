@@ -16,6 +16,8 @@ export interface StoredUser {
   passwordHash: string;
   role: "STUDENT" | "TEACHER" | "ADMIN";
   createdAt: number;
+  /** Epoch ms when the email was verified, or null/undefined. */
+  emailVerified?: number | null;
 }
 
 export interface Snapshot {
@@ -38,15 +40,24 @@ export interface ServerStore {
   putSnapshot(userId: string, data: unknown, expectVersion: number | null): Promise<
     { ok: true; version: number } | { ok: false; error: "conflict"; version: number }
   >;
+  /** Store an auth token hash, replacing any previous token for the identifier. */
+  saveToken(identifier: string, tokenHash: string, expiresAt: number): Promise<void>;
+  /** Consume a token: valid + unexpired → deleted and true; otherwise false. */
+  useToken(identifier: string, tokenHash: string): Promise<boolean>;
+  setPassword(userId: string, passwordHash: string): Promise<void>;
+  markEmailVerified(userId: string): Promise<void>;
 }
 
 // ─── FileStore ───────────────────────────────────────────────────────────────
 
 const DATA_DIR = process.env.COGNIFY_DATA_DIR || path.join(process.cwd(), ".data");
 
+interface FileToken { identifier: string; tokenHash: string; expiresAt: number; }
+
 interface FileDb {
   users: StoredUser[];
   snapshots: Record<string, Snapshot>;
+  tokens?: FileToken[];
 }
 
 async function readDb(): Promise<FileDb> {
@@ -54,7 +65,7 @@ async function readDb(): Promise<FileDb> {
     const raw = await fs.readFile(path.join(DATA_DIR, "db.json"), "utf8");
     return JSON.parse(raw) as FileDb;
   } catch {
-    return { users: [], snapshots: {} };
+    return { users: [], snapshots: {}, tokens: [] };
   }
 }
 
@@ -120,6 +131,49 @@ export class FileStore implements ServerStore {
       return { ok: true as const, version };
     });
   }
+
+  saveToken(identifier: string, tokenHash: string, expiresAt: number): Promise<void> {
+    return locked(async () => {
+      const db = await readDb();
+      db.tokens = (db.tokens ?? []).filter((t) => t.identifier !== identifier && t.expiresAt > Date.now());
+      db.tokens.push({ identifier, tokenHash, expiresAt });
+      await writeDb(db);
+    });
+  }
+
+  useToken(identifier: string, tokenHash: string): Promise<boolean> {
+    return locked(async () => {
+      const db = await readDb();
+      const tokens = db.tokens ?? [];
+      const idx = tokens.findIndex((t) => t.identifier === identifier && t.tokenHash === tokenHash);
+      if (idx === -1) return false;
+      const valid = tokens[idx].expiresAt > Date.now();
+      tokens.splice(idx, 1); // single-use either way
+      db.tokens = tokens;
+      await writeDb(db);
+      return valid;
+    });
+  }
+
+  setPassword(userId: string, passwordHash: string): Promise<void> {
+    return locked(async () => {
+      const db = await readDb();
+      const user = db.users.find((u) => u.id === userId);
+      if (!user) throw new Error("user_not_found");
+      user.passwordHash = passwordHash;
+      await writeDb(db);
+    });
+  }
+
+  markEmailVerified(userId: string): Promise<void> {
+    return locked(async () => {
+      const db = await readDb();
+      const user = db.users.find((u) => u.id === userId);
+      if (!user) throw new Error("user_not_found");
+      user.emailVerified = Date.now();
+      await writeDb(db);
+    });
+  }
 }
 
 // ─── PrismaStore ─────────────────────────────────────────────────────────────
@@ -180,11 +234,42 @@ export class PrismaStore implements ServerStore {
     });
     return { ok: true as const, version };
   }
+
+  async saveToken(identifier: string, tokenHash: string, expiresAt: number): Promise<void> {
+    const db = await prisma();
+    await db.verificationToken.deleteMany({ where: { identifier } });
+    await db.verificationToken.create({
+      data: { identifier, token: tokenHash, expires: new Date(expiresAt) },
+    });
+  }
+
+  async useToken(identifier: string, tokenHash: string): Promise<boolean> {
+    const db = await prisma();
+    const found = await db.verificationToken.findUnique({
+      where: { identifier_token: { identifier, token: tokenHash } },
+    });
+    if (!found) return false;
+    await db.verificationToken.delete({
+      where: { identifier_token: { identifier, token: tokenHash } },
+    }).catch(() => {}); // single-use either way
+    return found.expires.getTime() > Date.now();
+  }
+
+  async setPassword(userId: string, passwordHash: string): Promise<void> {
+    const db = await prisma();
+    await db.user.update({ where: { id: userId }, data: { passwordHash } });
+  }
+
+  async markEmailVerified(userId: string): Promise<void> {
+    const db = await prisma();
+    await db.user.update({ where: { id: userId }, data: { emailVerified: new Date() } });
+  }
 }
 
 function toStored(u: {
   id: string; email: string; name: string | null; avatar: string;
   passwordHash: string | null; role: string; createdAt: Date;
+  emailVerified?: Date | null;
 }): StoredUser {
   return {
     id: u.id,
@@ -194,6 +279,7 @@ function toStored(u: {
     passwordHash: u.passwordHash ?? "",
     role: (u.role as StoredUser["role"]) ?? "STUDENT",
     createdAt: u.createdAt.getTime(),
+    emailVerified: u.emailVerified ? u.emailVerified.getTime() : null,
   };
 }
 

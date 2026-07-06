@@ -114,6 +114,51 @@ describe("FileStore", () => {
   });
 });
 
+describe("FileStore auth tokens", () => {
+  let store: InstanceType<typeof FileStore>;
+
+  beforeEach(async () => {
+    await fs.rm(TEST_DIR, { recursive: true, force: true });
+    store = new FileStore();
+  });
+
+  it("saves and consumes a token exactly once", async () => {
+    await store.saveToken("reset:a@b.co", "hash1", Date.now() + 60_000);
+    expect(await store.useToken("reset:a@b.co", "hash1")).toBe(true);
+    expect(await store.useToken("reset:a@b.co", "hash1")).toBe(false); // single-use
+  });
+
+  it("rejects wrong hashes and wrong identifiers", async () => {
+    await store.saveToken("reset:a@b.co", "hash1", Date.now() + 60_000);
+    expect(await store.useToken("reset:a@b.co", "other")).toBe(false);
+    expect(await store.useToken("verify:a@b.co", "hash1")).toBe(false);
+    // the stored token survives failed attempts with other credentials
+    expect(await store.useToken("reset:a@b.co", "hash1")).toBe(true);
+  });
+
+  it("rejects expired tokens", async () => {
+    await store.saveToken("reset:a@b.co", "hash1", Date.now() - 1);
+    expect(await store.useToken("reset:a@b.co", "hash1")).toBe(false);
+  });
+
+  it("replaces a previous token for the same identifier", async () => {
+    await store.saveToken("reset:a@b.co", "old", Date.now() + 60_000);
+    await store.saveToken("reset:a@b.co", "new", Date.now() + 60_000);
+    expect(await store.useToken("reset:a@b.co", "old")).toBe(false);
+    expect(await store.useToken("reset:a@b.co", "new")).toBe(true);
+  });
+
+  it("updates passwords and marks emails verified", async () => {
+    const u = await store.createUser({ email: "a@b.co", name: "A", avatar: "F", passwordHash: "h1", role: "STUDENT" });
+    expect(u.emailVerified ?? null).toBeNull();
+    await store.setPassword(u.id, "h2");
+    await store.markEmailVerified(u.id);
+    const fresh = await store.getUserById(u.id);
+    expect(fresh?.passwordHash).toBe("h2");
+    expect(fresh?.emailVerified).toBeGreaterThan(0);
+  });
+});
+
 describe("rateLimit", () => {
   beforeEach(() => __resetRateLimits());
 
