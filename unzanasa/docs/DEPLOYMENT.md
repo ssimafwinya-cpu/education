@@ -47,6 +47,8 @@ Any managed Postgres works — [Neon](https://neon.tech),
 export DATABASE_URL="postgresql://user:pass@host:5432/unzanasa?schema=public"
 npm run db:generate        # generate the Prisma client
 npx prisma migrate deploy  # apply migrations (use migrate deploy in prod)
+# or, for a fresh database without migration history:
+npm run db:push            # sync the schema (creates the SiteContent table too)
 ```
 
 Without `DATABASE_URL`, the app uses a JSON file store under `.data/`. That is
@@ -111,6 +113,16 @@ Roles: `STUDENT` (default), `TEACHER`, `ADMIN`.
 > In guest mode (no account) the role can be switched under Settings → Role for
 > previewing; that is a local demo toggle only. Signed-in accounts always take
 > their role from the server.
+
+### Shared (admin-managed) content
+
+The programme catalogue, events, announcements, past papers and the executive
+committee are **association-wide**, served from `GET /api/content` and edited
+by admins in the Admin console. A signed-in admin's edits are written to
+`PUT /api/content` (admin-only) and stored in the `SiteContent` table (or the
+file store) as a single shared record, so every member and guest sees the same
+content. Guests/demo-admins can preview edits locally but cannot write globally.
+Until an admin saves anything, the built-in defaults are served.
 
 ---
 

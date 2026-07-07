@@ -11,6 +11,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useStore } from "./store";
 import type { AppState } from "./types";
+import { siteContentFromState, type SiteContent } from "./site-content";
 
 export interface AccountUser {
   id: string;
@@ -67,6 +68,29 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   const suppressNextPush = useRef(false);
   const stateRef = useRef(state);
   stateRef.current = state;
+
+  // ── Global (association-wide, admin-managed) content ──────────────────────
+  const contentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The content we last saw from / sent to the server, so we never echo an
+  // unchanged overlay straight back as a write (robust to render batching).
+  const lastServerContent = useRef<string>("");
+  const userRef = useRef<AccountUser | null>(user);
+  userRef.current = user;
+
+  /** Pull the shared site content and overlay it onto the store. */
+  const overlayContent = useCallback(async (): Promise<void> => {
+    const { status: code, body } = await api<{ content: SiteContent | null; version: number }>("/api/content");
+    // version 0 means no admin has ever saved content — leave the local store
+    // (its defaults, or a guest's demo edits) untouched.
+    if (code !== 200 || !body.content || !body.version) return;
+    const c = body.content;
+    lastServerContent.current = JSON.stringify(c);
+    dispatch({ type: "SET_PROGRAMMES", programmes: c.programmes });
+    dispatch({ type: "SET_EVENTS", events: c.events });
+    dispatch({ type: "SET_ANNOUNCEMENTS", announcements: c.announcements });
+    dispatch({ type: "SET_PAST_PAPERS", papers: c.pastPapers });
+    dispatch({ type: "SET_COMMITTEE", committee: c.committee });
+  }, [dispatch]);
 
   // ── Pull: adopt the server snapshot, or seed it from local state ──────────
   const pull = useCallback(async (): Promise<void> => {
@@ -127,6 +151,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
           setStatus("synced");
         }
       }
+      // Overlay the shared site content last, so it wins over any stale copy in
+      // the personal snapshot. Runs for guests and members alike.
+      if (!cancelled) await overlayContent();
     })().catch(() => {});
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -144,6 +171,23 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     return () => { if (pushTimer.current) clearTimeout(pushTimer.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, user, ready]);
+
+  // ── Admin write-back: persist shared content changes to /api/content ──────
+  // Only a signed-in ADMIN's edits are pushed globally; a guest's demo edits
+  // stay local. Overlay-driven changes are skipped via the suppress flag.
+  useEffect(() => {
+    if (!ready || userRef.current?.role?.toLowerCase() !== "admin") return;
+    const content = siteContentFromState(stateRef.current);
+    const serialized = JSON.stringify(content);
+    if (serialized === lastServerContent.current) return; // unchanged / just overlaid
+    if (contentTimer.current) clearTimeout(contentTimer.current);
+    contentTimer.current = setTimeout(() => {
+      lastServerContent.current = serialized;
+      api("/api/content", { method: "PUT", body: JSON.stringify({ content }) }).catch(() => {});
+    }, PUSH_DEBOUNCE_MS);
+    return () => { if (contentTimer.current) clearTimeout(contentTimer.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.catalogue, state.community, state.pastPapers, state.committee, ready]);
 
   // ── Reflect connectivity ───────────────────────────────────────────────────
   useEffect(() => {
@@ -183,11 +227,12 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       setStatus("syncing");
       await pull();
       dispatch({ type: "UPDATE_PROFILE", patch: { role: roleToProfile(body.user.role) } });
+      await overlayContent();
       setStatus("synced");
       return { ok: true };
     }
     return { ok: false, error: body.error ?? "Login failed." };
-  }, [pull, dispatch]);
+  }, [pull, dispatch, overlayContent]);
 
   const logout = useCallback(async () => {
     await api("/api/auth/logout", { method: "POST" }).catch(() => {});

@@ -40,6 +40,10 @@ export interface ServerStore {
   putSnapshot(userId: string, data: unknown, expectVersion: number | null): Promise<
     { ok: true; version: number } | { ok: false; error: "conflict"; version: number }
   >;
+  /** Read the association-wide site content (admin-managed), or null. */
+  getSiteContent(): Promise<{ data: unknown; version: number } | null>;
+  /** Replace the site content, bumping its version. */
+  putSiteContent(data: unknown): Promise<{ version: number }>;
   /** Store an auth token hash, replacing any previous token for the identifier. */
   saveToken(identifier: string, tokenHash: string, expiresAt: number): Promise<void>;
   /** Consume a token: valid + unexpired → deleted and true; otherwise false. */
@@ -58,6 +62,7 @@ interface FileDb {
   users: StoredUser[];
   snapshots: Record<string, Snapshot>;
   tokens?: FileToken[];
+  siteContent?: { data: unknown; version: number; updatedAt: number };
 }
 
 async function readDb(): Promise<FileDb> {
@@ -174,6 +179,21 @@ export class FileStore implements ServerStore {
       await writeDb(db);
     });
   }
+
+  async getSiteContent() {
+    const db = await readDb();
+    return db.siteContent ? { data: db.siteContent.data, version: db.siteContent.version } : null;
+  }
+
+  putSiteContent(data: unknown): Promise<{ version: number }> {
+    return locked(async () => {
+      const db = await readDb();
+      const version = (db.siteContent?.version ?? 0) + 1;
+      db.siteContent = { data, version, updatedAt: Date.now() };
+      await writeDb(db);
+      return { version };
+    });
+  }
 }
 
 // ─── PrismaStore ─────────────────────────────────────────────────────────────
@@ -263,6 +283,24 @@ export class PrismaStore implements ServerStore {
   async markEmailVerified(userId: string): Promise<void> {
     const db = await prisma();
     await db.user.update({ where: { id: userId }, data: { emailVerified: new Date() } });
+  }
+
+  async getSiteContent() {
+    const db = await prisma();
+    const row = await db.siteContent.findUnique({ where: { id: "global" } });
+    return row ? { data: row.data, version: row.version } : null;
+  }
+
+  async putSiteContent(data: unknown): Promise<{ version: number }> {
+    const db = await prisma();
+    const current = await db.siteContent.findUnique({ where: { id: "global" } });
+    const version = (current?.version ?? 0) + 1;
+    await db.siteContent.upsert({
+      where: { id: "global" },
+      create: { id: "global", data: data as object, version },
+      update: { data: data as object, version },
+    });
+    return { version };
   }
 }
 

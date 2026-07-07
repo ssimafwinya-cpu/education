@@ -91,7 +91,14 @@ Academic Hub (native module, one account):
   /hub/{courses,notes,pdf,mindmaps,flashcards,review,quizzes,exams,tutor,
         planner,analytics,achievements,social,admin,settings}
 
-APIs: /api/auth/*  /api/sync  /api/ai/*  /api/health
+APIs: /api/auth/*  /api/sync  /api/content  /api/ai/*  /api/health
+
+Shared content: the programme catalogue, events, announcements, past papers and
+the committee are association-wide. Admins edit them in the Admin console; a
+signed-in admin's edits go to PUT /api/content (admin-only) and are stored once
+(SiteContent), so every member and guest reads the same content from
+GET /api/content. Personal data (notes, decks, RSVPs, profile) stays per-user
+via /api/sync.
 ```
 
 ## Running it

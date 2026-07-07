@@ -470,6 +470,15 @@ model StateSnapshot {
   updatedAt DateTime @updatedAt
 }
 
+// Association-wide, admin-managed content (a single "global" row): the
+// programme catalogue, events, announcements, past papers and committee.
+model SiteContent {
+  id        String   @id @default("global")
+  data      Json
+  version   Int      @default(1)
+  updatedAt DateTime @updatedAt
+}
+
 // ─── Audit log (security & compliance) ───────────────────────────────────────
 
 model AuditLog {
