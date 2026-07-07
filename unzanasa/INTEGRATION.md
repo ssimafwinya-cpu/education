@@ -87,11 +87,14 @@ Academic Hub (native module, one account):
   /hub/science/{biology,chemistry,physics,mathematics,lab,research}
   /hub/past-papers         admin-curated past-paper bank (lib/past-papers.ts),
                            browsable by course/year/type; admins add & edit
-                           papers inline (role-gated), students browse & open
+                           papers inline (role-gated), students browse & open.
+                           Admins can upload the actual PDF (POST /api/files,
+                           admin-only, magic-byte validated, 15 MB cap; served
+                           from GET /api/files/<id>) or paste an external link
   /hub/{courses,notes,pdf,mindmaps,flashcards,review,quizzes,exams,tutor,
         planner,analytics,achievements,social,admin,settings}
 
-APIs: /api/auth/*  /api/sync  /api/content  /api/ai/*  /api/health
+APIs: /api/auth/*  /api/sync  /api/content  /api/files  /api/ai/*  /api/health
 
 Shared content: the programme catalogue, events, announcements, past papers and
 the committee are association-wide. Admins edit them in the Admin console; a

@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ScrollText, ExternalLink, Search, Plus, Trash2, FileText, BookOpen } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { ScrollText, ExternalLink, Search, Plus, Trash2, FileText, BookOpen, Upload } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { PageHeader } from "@/components/page-header";
 import { Card, Badge, EmptyState, useToast } from "@/components/ui";
@@ -33,6 +33,24 @@ export default function PastPapersPage() {
   const addPaper = () => {
     setPapers([...papers, { id: uid("pp"), courseCode: "", courseTitle: "", year: new Date().getFullYear(), kind: "Final" }]);
     toast({ emoji: "📄", title: "Paper added — fill in the course and link." });
+  };
+
+  /** Upload a PDF for a paper row (real admin account required by the server). */
+  const uploadFor = async (paperId: string, file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    try {
+      const res = await fetch("/api/files", { method: "POST", body: form });
+      const body = await res.json();
+      if (res.ok && body.url) {
+        patch(paperId, { url: body.url });
+        toast({ emoji: "📎", title: "PDF uploaded and linked." });
+      } else {
+        toast({ emoji: "⚠️", title: body.error ?? "Upload failed — sign in as an admin." });
+      }
+    } catch {
+      toast({ emoji: "⚠️", title: "Upload failed — network error." });
+    }
   };
 
   return (
@@ -75,7 +93,7 @@ export default function PastPapersPage() {
               <div className="divide-y divide-edge">
                 {g.papers.map((p) => (
                   isAdmin
-                    ? <AdminRow key={p.id} p={p} onPatch={patch} onDelete={() => setPapers(papers.filter((x) => x.id !== p.id))} />
+                    ? <AdminRow key={p.id} p={p} onPatch={patch} onUpload={uploadFor} onDelete={() => setPapers(papers.filter((x) => x.id !== p.id))} />
                     : <StudentRow key={p.id} p={p} />
                 ))}
               </div>
@@ -108,16 +126,25 @@ function StudentRow({ p }: { p: PastPaper }) {
   );
 }
 
-function AdminRow({ p, onPatch, onDelete }: { p: PastPaper; onPatch: (id: string, patch: Partial<PastPaper>) => void; onDelete: () => void }) {
+function AdminRow({ p, onPatch, onUpload, onDelete }: {
+  p: PastPaper;
+  onPatch: (id: string, patch: Partial<PastPaper>) => void;
+  onUpload: (id: string, file: File) => void;
+  onDelete: () => void;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
   return (
-    <div className="grid grid-cols-[110px_1fr_90px_130px_1fr_auto] items-center gap-2 py-2">
+    <div className="grid grid-cols-[110px_1fr_90px_130px_1fr_auto_auto] items-center gap-2 py-2">
       <input value={p.courseCode} onChange={(e) => onPatch(p.id, { courseCode: e.target.value })} className="input font-mono text-xs" placeholder="CODE" aria-label="Course code" />
       <input value={p.courseTitle} onChange={(e) => onPatch(p.id, { courseTitle: e.target.value })} className="input text-sm" placeholder="Course title" aria-label="Course title" />
       <input type="number" value={p.year} onChange={(e) => onPatch(p.id, { year: Number(e.target.value) })} className="input text-sm" aria-label="Year" />
       <select value={p.kind} onChange={(e) => onPatch(p.id, { kind: e.target.value as ExamKind })} className="input text-sm" aria-label="Exam type">
         {EXAM_KINDS.map((k) => <option key={k} value={k}>{k}</option>)}
       </select>
-      <input value={p.url ?? ""} onChange={(e) => onPatch(p.id, { url: e.target.value || undefined })} className="input text-sm" placeholder="Link URL" aria-label="Link" />
+      <input value={p.url ?? ""} onChange={(e) => onPatch(p.id, { url: e.target.value || undefined })} className="input text-sm" placeholder="Link URL — or upload a PDF" aria-label="Link" />
+      <input ref={fileRef} type="file" accept="application/pdf" className="hidden" aria-label="Upload PDF"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) onUpload(p.id, f); e.target.value = ""; }} />
+      <button onClick={() => fileRef.current?.click()} className="btn-secondary btn-sm" title="Upload a PDF" aria-label="Upload PDF"><Upload size={14} /></button>
       <button onClick={onDelete} className="btn-ghost btn-sm text-crimson-600" aria-label="Delete paper"><Trash2 size={14} /></button>
     </div>
   );

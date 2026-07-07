@@ -139,7 +139,18 @@ flows are fully testable offline.
 
 ---
 
-## 6. Health checks
+## 6. Uploaded files (past papers)
+
+Admins can upload past-paper PDFs directly (`POST /api/files`, admin-only,
+15 MB cap, validated by PDF magic bytes). Files are stored on local disk under
+`UPLOADS_DIR` (default `.data/uploads`) and served from `GET /api/files/<id>`.
+
+- **VPS / Docker**: mount the directory as a volume so uploads survive
+  restarts, e.g. `-v /srv/unzanasa/uploads:/app/.data/uploads`.
+- **Serverless (Vercel)**: the filesystem is ephemeral — keep using external
+  links (Drive / member portal) in the past-paper bank instead of uploads.
+
+## 7. Health checks
 
 `GET /api/health` returns liveness + readiness:
 
@@ -152,7 +163,7 @@ your platform's health probe or an uptime monitor.
 
 ---
 
-## 7. Security checklist
+## 8. Security checklist
 
 - [ ] `AUTH_SECRET` is a fresh 32-byte secret, not the placeholder.
 - [ ] `DATABASE_URL` points at managed Postgres with backups enabled.
