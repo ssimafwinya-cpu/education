@@ -111,8 +111,9 @@ Same as the base app — see the root `docs/SETUP.md`. From this directory:
 ```bash
 npm install      # (or reuse the parent's node_modules)
 npm run dev      # → http://localhost:3000
-npm test         # 385 tests (incl. the science-engine suites)
+npm test         # 410 unit tests (incl. the science-engine suites)
 npm run build    # production build
+npm run test:e2e # black-box e2e against the built server (see e2e/README.md)
 ```
 
 ## Deploying it
