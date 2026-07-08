@@ -29,7 +29,8 @@ export const SCHOOL = {
 export interface FoundationCourse {
   discipline: string;
   emoji: string;
-  general: { code?: string; title: string };
+  /** The course everyone takes — absent for health-stream-only courses. */
+  general?: { code?: string; title: string };
   /** Stream taken by health-programme (medical) students, where it differs. */
   healthStream?: { code?: string; title: string };
 }
@@ -50,6 +51,12 @@ export const FIRST_YEAR: FoundationCourse[] = [
     discipline: "Mathematics", emoji: "📐",
     general: { code: "MAT 1100", title: "Foundation Mathematics" },
     healthStream: { title: "Mathematics (health stream)" },
+  },
+  {
+    // Taken ONLY by students proceeding to health programmes — an additional
+    // fifth course on top of the common four.
+    discipline: "DME", emoji: "🩺",
+    healthStream: { code: "DME", title: "Additional course for the health stream" },
   },
 ];
 

@@ -36,21 +36,27 @@ export default function Academics() {
             All first-year students take the same four foundation courses. This year is also taken by students bound for
             health programmes at Ridgeway Campus and for Mines, Agriculture, Veterinary Medicine and Engineering — they
             pass through Natural Sciences in first year, then move to their school in second year. Health-programme
-            students take designated <span className="inline-flex items-center gap-0.5 text-crimson-600"><Stethoscope size={12} /> health-stream</span> variants of Chemistry, Physics and Mathematics.
+            students take designated <span className="inline-flex items-center gap-0.5 text-crimson-600"><Stethoscope size={12} /> health-stream</span> variants of Chemistry, Physics and Mathematics,
+            plus an additional fifth course, <span className="font-medium text-ink">DME</span>.
           </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {FIRST_YEAR.map((f) => (
               <div key={f.discipline} className="card p-5">
-                <div className="mb-3 flex items-center gap-2 font-semibold"><span className="text-lg">{f.emoji}</span> {f.discipline}</div>
-                <div className="flex items-start gap-2 text-sm">
-                  <CourseCode code={f.general.code} />
-                  <span className="text-ink-muted">{f.general.title}</span>
+                <div className="mb-3 flex items-center gap-2 font-semibold">
+                  <span className="text-lg">{f.emoji}</span> {f.discipline}
+                  {!f.general && <span className="ml-auto inline-flex items-center gap-1 rounded-md bg-crimson-600/10 px-1.5 py-0.5 text-[10px] font-medium text-crimson-600"><Stethoscope size={10} /> health only</span>}
                 </div>
+                {f.general && (
+                  <div className="flex items-start gap-2 text-sm">
+                    <CourseCode code={f.general.code} />
+                    <span className="text-ink-muted">{f.general.title}</span>
+                  </div>
+                )}
                 {f.healthStream && (
-                  <div className="mt-2 flex items-start gap-2 text-sm">
+                  <div className={`flex items-start gap-2 text-sm ${f.general ? "mt-2" : ""}`}>
                     <CourseCode code={f.healthStream.code} />
                     <span className="text-ink-muted">{f.healthStream.title}
-                      <Stethoscope size={11} className="ml-1 inline align-middle text-crimson-600" />
+                      {f.general && <Stethoscope size={11} className="ml-1 inline align-middle text-crimson-600" />}
                     </span>
                   </div>
                 )}

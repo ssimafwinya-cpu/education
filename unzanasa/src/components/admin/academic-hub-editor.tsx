@@ -51,7 +51,7 @@ export function AcademicHubEditor() {
         <div className="grid gap-2 sm:grid-cols-2">
           <div className="text-xs text-ink-muted">
             <span className="font-medium text-ink">Common first year:</span>{" "}
-            {FIRST_YEAR.map((f) => `${f.discipline} (${f.general.code ?? "—"})`).join(", ")}.
+            {FIRST_YEAR.map((f) => `${f.discipline} (${f.general?.code ?? "health stream only"})`).join(", ")}.
           </div>
           <div className="text-xs text-ink-muted">
             <span className="font-medium text-ink">Departments:</span> {DEPARTMENTS.map((d) => d.name).join(", ")}.

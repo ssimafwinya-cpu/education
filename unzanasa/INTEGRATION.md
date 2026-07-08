@@ -69,7 +69,8 @@ Public site (association):
                            Mathematics MAT 1100) taken by every NS student and
                            by pass-through students bound for health / mines /
                            agriculture / vet / engineering, with health-stream
-                           variants (CHE 1010, PHY 1015, medical maths); the 5
+                           variants (CHE 1010, PHY 1015, medical maths) plus the
+                           additional health-only course DME; the 5
                            departments; and the 7 programmes, with Microbiology's
                            second-year courses detailed by contributing
                            department. The hub's starter content (lib/seed.ts)
