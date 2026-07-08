@@ -56,7 +56,7 @@ export const FIRST_YEAR: FoundationCourse[] = [
     // Taken ONLY by students proceeding to health programmes — an additional
     // fifth course on top of the common four.
     discipline: "DME", emoji: "🩺",
-    healthStream: { code: "DME", title: "Additional course for the health stream" },
+    healthStream: { code: "DME 1115", title: "Communication, Professionalism and Student Support" },
   },
 ];
 

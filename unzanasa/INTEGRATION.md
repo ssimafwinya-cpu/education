@@ -95,9 +95,15 @@ Academic Hub (native module, one account):
                            (memory checks; failures flag "needs review"), and
                            an exam-readiness score (passed AND retained exam
                            weight) sits beside completion %. XP ranks run
-                           Fresher → Professor. Ships with a full CHE 1000
-                           starter path; real notes/outlines/past papers feed
-                           new courses through the same CareerCourse shape.
+                           Fresher → Professor. Ships with two courses: the
+                           CHE 1000 starter path, and DME 1115 (Communication,
+                           Professionalism & Student Support) built from REAL
+                           papers — the 2023 final, 2022 test and 2021/22
+                           sample questions (the PDFs ship in
+                           /documents/past-papers and are listed in the
+                           past-paper bank). Real questions carry source refs
+                           (e.g. "2023 Final Q15"); topic weights follow the
+                           2023 final's actual distribution.
   /hub/past-papers         admin-curated past-paper bank (lib/past-papers.ts),
                            browsable by course/year/type; admins add & edit
                            papers inline (role-gated), students browse & open.

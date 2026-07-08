@@ -212,7 +212,9 @@ export const CHE1000_CAREER: CareerCourse = {
   ],
 };
 
-export const CAREER_COURSES: CareerCourse[] = [CHE1000_CAREER];
+import { DME1115_CAREER } from "./career-content-dme";
+
+export const CAREER_COURSES: CareerCourse[] = [CHE1000_CAREER, DME1115_CAREER];
 
 export function careerCourseById(id: string): CareerCourse | undefined {
   return CAREER_COURSES.find((c) => c.id === id);

@@ -26,7 +26,8 @@ type View =
 
 export default function CareerPage() {
   const { state, dispatch } = useStore();
-  const course = CAREER_COURSES[0];
+  const [courseId, setCourseId] = useState(CAREER_COURSES[0].id);
+  const course = CAREER_COURSES.find((c) => c.id === courseId) ?? CAREER_COURSES[0];
   const progress = state.career?.[course.id] ?? emptyCourseProgress();
   const [view, setView] = useState<View>({ kind: "tree" });
   const now = Date.now();
@@ -47,6 +48,21 @@ export default function CareerPage() {
         icon={<Swords className="text-brand-500" />}
         actions={<Badge tone="gold">{rank.emoji} {rank.title}</Badge>}
       />
+
+      {/* Course picker */}
+      {CAREER_COURSES.length > 1 && (
+        <div className="mb-5 flex flex-wrap gap-2">
+          {CAREER_COURSES.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => { setCourseId(c.id); setView({ kind: "tree" }); }}
+              className={cn("chip border transition", c.id === course.id ? "border-brand-500 bg-brand-500/10 text-brand-600 dark:text-brand-300" : "border-edge text-ink-muted hover:border-brand-400")}
+            >
+              {c.emoji} {c.code}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Header stats */}
       <div className="mb-6 grid gap-3 sm:grid-cols-3">

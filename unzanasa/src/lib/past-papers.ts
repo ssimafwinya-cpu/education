@@ -11,6 +11,10 @@ export const EXAM_KINDS: ExamKind[] = ["Test", "Final", "Supplementary", "Assign
 /** A small starter index across the common first-year courses. */
 export function defaultPastPapers(): PastPaper[] {
   return [
+    // Real DME 1115 papers (shipped in /documents/past-papers).
+    { id: "pp_dme_2023_f", courseCode: "DME 1115", courseTitle: "Communication, Professionalism and Student Support", year: 2023, kind: "Final", label: "End of year (RS1)", url: "/documents/past-papers/DME-1115-2023-final.pdf" },
+    { id: "pp_dme_2022_t", courseCode: "DME 1115", courseTitle: "Communication, Professionalism and Student Support", year: 2022, kind: "Test", url: "/documents/past-papers/DME-2022-test.pdf" },
+    { id: "pp_dme_sample", courseCode: "DME 1115", courseTitle: "Communication, Professionalism and Student Support", year: 2022, kind: "Test", label: "Sample questions 2021/22", url: "/documents/past-papers/DME-sample-questions-2021-22.pdf" },
     { id: "pp_bio_2024_f", courseCode: "BIO 1400", courseTitle: "Introductory Biology", year: 2024, kind: "Final" },
     { id: "pp_bio_2023_f", courseCode: "BIO 1400", courseTitle: "Introductory Biology", year: 2023, kind: "Final" },
     { id: "pp_che_2024_f", courseCode: "CHE 1000", courseTitle: "Introductory Chemistry", year: 2024, kind: "Final" },
