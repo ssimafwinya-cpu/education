@@ -72,7 +72,9 @@ type Action =
   // past-paper bank (admin-curated)
   | { type: "SET_PAST_PAPERS"; papers: import("./types").PastPaper[] }
   // executive committee (admin-managed)
-  | { type: "SET_COMMITTEE"; committee: import("./types").ExecMember[] };
+  | { type: "SET_COMMITTEE"; committee: import("./types").ExecMember[] }
+  // career mode (per-user progress)
+  | { type: "UPDATE_CAREER"; courseId: string; progress: import("./career").CourseProgress };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -355,6 +357,10 @@ function reducer(state: AppState, action: Action): AppState {
     // executive committee
     case "SET_COMMITTEE":
       return { ...state, committee: action.committee };
+
+    // career mode
+    case "UPDATE_CAREER":
+      return { ...state, career: { ...(state.career ?? {}), [action.courseId]: action.progress } };
 
     default:
       return state;

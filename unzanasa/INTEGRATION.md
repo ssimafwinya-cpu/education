@@ -85,6 +85,18 @@ Academic Hub (native module, one account):
   /hub                     dashboard
   /hub/science             Science Labs hub
   /hub/science/{biology,chemistry,physics,mathematics,lab,research}
+  /hub/career              Career Mode (lib/career.ts + career-content.ts): a
+                           course as one locked path — teach from the notes
+                           with comprehension checks, drill exam-style
+                           questions with confidence tags, pass the Examiner's
+                           closed-book Move Test (80%) to unlock dependents.
+                           Passed topics enter topic-level spaced repetition
+                           (memory checks; failures flag "needs review"), and
+                           an exam-readiness score (passed AND retained exam
+                           weight) sits beside completion %. XP ranks run
+                           Fresher → Professor. Ships with a full CHE 1000
+                           starter path; real notes/outlines/past papers feed
+                           new courses through the same CareerCourse shape.
   /hub/past-papers         admin-curated past-paper bank (lib/past-papers.ts),
                            browsable by course/year/type; admins add & edit
                            papers inline (role-gated), students browse & open.

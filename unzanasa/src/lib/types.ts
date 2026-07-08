@@ -287,6 +287,8 @@ export interface AppState {
   pastPapers?: PastPaper[];
   /** Admin-managed executive committee (Article 8 offices → holders). */
   committee?: ExecMember[];
+  /** Career Mode progress per career course (per-user, synced). */
+  career?: Record<ID, import("./career").CourseProgress>;
 }
 
 // ─── Executive committee (admin-managed) ─────────────────────────────────────
