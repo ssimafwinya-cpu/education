@@ -1,5 +1,7 @@
-# ─── Cognify local / self-hosted stack ──────────────────────────────────────
-# Brings up the app together with PostgreSQL, Redis and Meilisearch.
+# ─── UNZANASA platform self-hosted stack ────────────────────────────────────
+# Brings up the app together with PostgreSQL. The appdata volume persists
+# /app/.data (uploaded past-paper PDFs, mail outbox, file-store fallback)
+# across rebuilds; pgdata persists accounts, sync snapshots and site content.
 #   docker compose up --build
 services:
   app:
@@ -8,57 +10,40 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://cognify:cognify@db:5432/cognify?schema=public
-      REDIS_URL: redis://redis:6379
-      MEILISEARCH_HOST: http://meilisearch:7700
+      DATABASE_URL: postgresql://unzanasa:unzanasa@db:5432/unzanasa?schema=public
       AUTH_SECRET: ${AUTH_SECRET:-change-me-in-production}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      # Email (password reset / verification). Without a key, mails land in
+      # /app/.data/outbox as files with the action links inside.
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      MAIL_FROM: ${MAIL_FROM:-}
       # AI keys are optional — the app ships with an offline tutor engine.
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    volumes:
+      - appdata:/app/.data
     depends_on:
       db:
         condition: service_healthy
-      redis:
-        condition: service_started
     restart: unless-stopped
 
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: cognify
-      POSTGRES_PASSWORD: cognify
-      POSTGRES_DB: cognify
+      POSTGRES_USER: unzanasa
+      POSTGRES_PASSWORD: unzanasa
+      POSTGRES_DB: unzanasa
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432" # localhost-only: lets `prisma migrate deploy` run from a checkout
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U cognify"]
+      test: ["CMD-SHELL", "pg_isready -U unzanasa"]
       interval: 5s
       timeout: 5s
       retries: 5
-
-  redis:
-    image: redis:7-alpine
-    command: redis-server --save 60 1 --loglevel warning
-    ports:
-      - "6379:6379"
-    volumes:
-      - redisdata:/data
-    restart: unless-stopped
-
-  meilisearch:
-    image: getmeili/meilisearch:v1.6
-    environment:
-      MEILI_MASTER_KEY: ${MEILISEARCH_API_KEY:-masterKey}
-      MEILI_NO_ANALYTICS: "true"
-    ports:
-      - "7700:7700"
-    volumes:
-      - meilidata:/meili_data
     restart: unless-stopped
 
 volumes:
+  appdata:
   pgdata:
-  redisdata:
-  meilidata:

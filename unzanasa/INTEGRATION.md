@@ -127,6 +127,13 @@ via /api/sync.
 
 Same as the base app — see the root `docs/SETUP.md`. From this directory:
 
+> **Local checkout note:** `unzanasa/node_modules` is a symlink to the parent's
+> `node_modules`, so both projects share one dependency tree (CI installs them
+> separately). The generated Prisma client is part of that tree and whichever
+> project ran `prisma generate` last wins — always regenerate from *this*
+> directory (its schema is a superset of the root's, so both projects
+> typecheck), never from the root while working here.
+
 ```bash
 npm install      # (or reuse the parent's node_modules)
 npm run dev      # → http://localhost:3000

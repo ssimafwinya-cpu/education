@@ -1,4 +1,4 @@
-# ─── Cognify production image (multi-stage) ─────────────────────────────────
+# ─── UNZANASA platform production image (multi-stage) ───────────────────────
 # Builds the Next.js app in standalone mode for a small runtime image.
 
 # 1. Install dependencies (cached layer)
@@ -30,6 +30,12 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
+
+# Writable data dir (file store, mail outbox, uploaded past-paper PDFs).
+# Mount a volume here — docker-compose maps appdata:/app/.data — so uploads
+# survive rebuilds. Pre-creating it owned by nextjs lets the named volume
+# inherit the right ownership on first mount.
+RUN mkdir -p .data && chown nextjs:nodejs .data
 
 USER nextjs
 EXPOSE 3000

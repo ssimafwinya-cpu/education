@@ -47,8 +47,8 @@ Any managed Postgres works — [Neon](https://neon.tech),
 export DATABASE_URL="postgresql://user:pass@host:5432/unzanasa?schema=public"
 npm run db:generate        # generate the Prisma client
 npx prisma migrate deploy  # apply migrations (use migrate deploy in prod)
-# or, for a fresh database without migration history:
-npm run db:push            # sync the schema (creates the SiteContent table too)
+# or, to sync the schema without recording migration history:
+npm run db:push
 ```
 
 Without `DATABASE_URL`, the app uses a JSON file store under `.data/`. That is
@@ -77,6 +77,7 @@ are automatically marked `Secure` when `NODE_ENV=production`.
 ```bash
 docker build -t unzanasa-hub .
 docker run -p 3000:3000 \
+  -v unzanasa-data:/app/.data \
   -e NODE_ENV=production \
   -e AUTH_SECRET=… \
   -e DATABASE_URL=… \
@@ -84,6 +85,17 @@ docker run -p 3000:3000 \
   -e RESEND_API_KEY=… \
   unzanasa-hub
 ```
+
+Mount a volume at `/app/.data` — uploaded past-paper PDFs (and the file-store
+fallback + mail outbox) live there and must survive rebuilds. Or bring up the
+whole stack (app + PostgreSQL, both persisted) with:
+
+```bash
+AUTH_SECRET=$(openssl rand -hex 32) docker compose up --build -d
+```
+
+The runtime image has no Prisma CLI, so apply migrations from a checkout
+against the same `DATABASE_URL` (`npx prisma migrate deploy`) before first use.
 
 ### Option C — Vercel
 
