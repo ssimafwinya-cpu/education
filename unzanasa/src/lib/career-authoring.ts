@@ -52,11 +52,17 @@ function validateQuestion(
     out.answerText = answers;
     return out;
   }
+  // Do NOT drop empty options: answerIndex was chosen against the full list,
+  // so filtering would silently re-point it at the wrong option. Reject empties
+  // instead and keep the indices honest.
   const options = kind === "truefalse"
     ? ["True", "False"]
-    : Array.isArray(q.options) ? q.options.map(str).filter(Boolean) : [];
+    : Array.isArray(q.options) ? q.options.map(str) : [];
   const answerIndex = typeof q.answerIndex === "number" && Number.isInteger(q.answerIndex) ? q.answerIndex : -1;
-  if (kind === "mcq" && options.length < 2) errors.push(`${where}: mcq needs at least 2 options`);
+  if (kind === "mcq") {
+    if (options.length < 2) errors.push(`${where}: mcq needs at least 2 options`);
+    if (options.some((o) => !o)) errors.push(`${where}: every option needs text (remove blanks)`);
+  }
   if (answerIndex < 0 || answerIndex >= options.length) {
     errors.push(`${where}: answerIndex must point at one of the options`);
   }

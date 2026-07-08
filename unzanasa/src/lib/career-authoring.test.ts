@@ -112,6 +112,18 @@ describe("validateCareerCourse", () => {
     expect(validateCareerCourse(badFill).ok).toBe(false);
   });
 
+  it("rejects an empty mcq option instead of silently shifting the answer", () => {
+    // ["", "Blue", "Red"] with answerIndex 1 means the admin picked "Blue".
+    // Dropping the empty would slide answerIndex 1 onto "Red" — a silently
+    // wrong answer key. It must be an error, not a silent normalise.
+    const input = goodCourse();
+    ((input.topics as Record<string, unknown>[])[0].drill as unknown[]) =
+      [mcq("d1", { options: ["", "Blue", "Red"], answerIndex: 1 }), mcq("d2")];
+    const r = validateCareerCourse(input);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.join()).toMatch(/every option needs text/);
+  });
+
   it("normalises truefalse options and requires a valid answerIndex", () => {
     const input = goodCourse();
     ((input.topics as Record<string, unknown>[])[0].drill as unknown[]) =
