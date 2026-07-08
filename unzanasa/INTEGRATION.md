@@ -104,6 +104,15 @@ Academic Hub (native module, one account):
                            past-paper bank). Real questions carry source refs
                            (e.g. "2023 Final Q15"); topic weights follow the
                            2023 final's actual distribution.
+                           Admins author their own courses in the Admin
+                           console's "Career Mode" tab (notes → teach
+                           sections, past-paper questions → drills & Move
+                           Tests): every course passes validateCareerCourse
+                           (unique ids, acyclic prereqs, non-empty Move Test,
+                           well-formed questions) before it can be saved, is
+                           distributed to all members via the global site
+                           content, and can be imported/exported as JSON. A
+                           custom course with a built-in's id overrides it.
   /hub/past-papers         admin-curated past-paper bank (lib/past-papers.ts),
                            browsable by course/year/type; admins add & edit
                            papers inline (role-gated), students browse & open.

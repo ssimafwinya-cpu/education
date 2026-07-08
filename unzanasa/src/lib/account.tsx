@@ -90,6 +90,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: "SET_ANNOUNCEMENTS", announcements: c.announcements });
     dispatch({ type: "SET_PAST_PAPERS", papers: c.pastPapers });
     dispatch({ type: "SET_COMMITTEE", committee: c.committee });
+    dispatch({ type: "SET_CAREER_COURSES", courses: c.careerCourses ?? [] });
   }, [dispatch]);
 
   // ── Pull: adopt the server snapshot, or seed it from local state ──────────
@@ -187,7 +188,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     }, PUSH_DEBOUNCE_MS);
     return () => { if (contentTimer.current) clearTimeout(contentTimer.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.catalogue, state.community, state.pastPapers, state.committee, ready]);
+  }, [state.catalogue, state.community, state.pastPapers, state.committee, state.careerCourses, ready]);
 
   // ── Reflect connectivity ───────────────────────────────────────────────────
   useEffect(() => {

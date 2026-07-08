@@ -289,6 +289,8 @@ export interface AppState {
   committee?: ExecMember[];
   /** Career Mode progress per career course (per-user, synced). */
   career?: Record<ID, import("./career").CourseProgress>;
+  /** Admin-authored Career Mode courses (association-wide, via site content). */
+  careerCourses?: import("./career").CareerCourse[];
 }
 
 // ─── Executive committee (admin-managed) ─────────────────────────────────────

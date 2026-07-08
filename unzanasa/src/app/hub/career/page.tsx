@@ -17,6 +17,7 @@ import {
   type CareerCourse, type CareerTopic, type CareerQuestion, type CourseProgress, type MoveTestVerdict,
 } from "@/lib/career";
 import { CAREER_COURSES } from "@/lib/career-content";
+import { mergeCareerCourses } from "@/lib/career-authoring";
 import { cn } from "@/lib/utils";
 
 type View =
@@ -26,8 +27,12 @@ type View =
 
 export default function CareerPage() {
   const { state, dispatch } = useStore();
-  const [courseId, setCourseId] = useState(CAREER_COURSES[0].id);
-  const course = CAREER_COURSES.find((c) => c.id === courseId) ?? CAREER_COURSES[0];
+  const courses = useMemo(
+    () => mergeCareerCourses(CAREER_COURSES, state.careerCourses),
+    [state.careerCourses],
+  );
+  const [courseId, setCourseId] = useState(courses[0].id);
+  const course = courses.find((c) => c.id === courseId) ?? courses[0];
   const progress = state.career?.[course.id] ?? emptyCourseProgress();
   const [view, setView] = useState<View>({ kind: "tree" });
   const now = Date.now();
@@ -50,9 +55,9 @@ export default function CareerPage() {
       />
 
       {/* Course picker */}
-      {CAREER_COURSES.length > 1 && (
+      {courses.length > 1 && (
         <div className="mb-5 flex flex-wrap gap-2">
-          {CAREER_COURSES.map((c) => (
+          {courses.map((c) => (
             <button
               key={c.id}
               onClick={() => { setCourseId(c.id); setView({ kind: "tree" }); }}

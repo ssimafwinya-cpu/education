@@ -14,6 +14,7 @@ import { AreaChart, BarChart, Donut } from "@/components/charts";
 import { AcademicHubEditor } from "@/components/admin/academic-hub-editor";
 import { CommunityEditor } from "@/components/admin/community-editor";
 import { CommitteeEditor } from "@/components/admin/committee-editor";
+import { CareerEditor } from "@/components/admin/career-editor";
 import { cn } from "@/lib/utils";
 
 // The admin panel is role-gated (profile.role === "admin"). Metrics use
@@ -48,7 +49,7 @@ const AUDIT = [
 export default function AdminPage() {
   const { state, dispatch } = useStore();
   const toast = useToast();
-  const [tab, setTab] = useState<"overview" | "users" | "academic" | "community" | "committee" | "moderation" | "audit">("overview");
+  const [tab, setTab] = useState<"overview" | "users" | "academic" | "career" | "community" | "committee" | "moderation" | "audit">("overview");
   const [query, setQuery] = useState("");
   const [suspended, setSuspended] = useState<Set<string>>(new Set(["sam@school.org"]));
   const [resolved, setResolved] = useState<Set<string>>(new Set());
@@ -87,6 +88,7 @@ export default function AdminPage() {
           { value: "overview", label: "Overview" },
           { value: "users", label: "Users" },
           { value: "academic", label: "Academic Hub" },
+          { value: "career", label: "Career Mode" },
           { value: "community", label: "Events & News" },
           { value: "committee", label: "Committee" },
           { value: "moderation", label: <span className="flex items-center gap-1">Moderation {FLAGGED.length - resolved.size > 0 && <span className="chip bg-rose-500/15 text-rose-500">{FLAGGED.length - resolved.size}</span>}</span> },
@@ -150,6 +152,14 @@ export default function AdminPage() {
           <h3 className="mb-1 flex items-center gap-2 font-semibold"><GraduationCap size={16} className="text-brand-500" /> Academic Hub — course catalogue</h3>
           <p className="mb-4 text-sm text-ink-muted">Manage the School of Natural Sciences programmes and their second-year courses. Changes appear on the public Academics page.</p>
           <AcademicHubEditor />
+        </Card>
+      )}
+
+      {tab === "career" && (
+        <Card>
+          <h3 className="mb-1 flex items-center gap-2 font-semibold"><GraduationCap size={16} className="text-brand-500" /> Career Mode — course paths</h3>
+          <p className="mb-4 text-sm text-ink-muted">Author the gated course paths students play in Career Mode: notes become teach sections, past-paper questions become drills and Move Tests. Saved courses go live for every member.</p>
+          <CareerEditor />
         </Card>
       )}
 

@@ -73,8 +73,9 @@ type Action =
   | { type: "SET_PAST_PAPERS"; papers: import("./types").PastPaper[] }
   // executive committee (admin-managed)
   | { type: "SET_COMMITTEE"; committee: import("./types").ExecMember[] }
-  // career mode (per-user progress)
-  | { type: "UPDATE_CAREER"; courseId: string; progress: import("./career").CourseProgress };
+  // career mode (per-user progress; admin-authored custom courses are shared)
+  | { type: "UPDATE_CAREER"; courseId: string; progress: import("./career").CourseProgress }
+  | { type: "SET_CAREER_COURSES"; courses: import("./career").CareerCourse[] };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -361,6 +362,8 @@ function reducer(state: AppState, action: Action): AppState {
     // career mode
     case "UPDATE_CAREER":
       return { ...state, career: { ...(state.career ?? {}), [action.courseId]: action.progress } };
+    case "SET_CAREER_COURSES":
+      return { ...state, careerCourses: action.courses };
 
     default:
       return state;
